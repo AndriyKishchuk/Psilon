@@ -1,0 +1,76 @@
+<odoo>
+    <record id="psi_intern_attendance_calendar_action" model="ir.actions.act_window">
+        <field name="name">Kalendarz praktyk</field>
+        <field name="res_model">psi.intern.attendance</field>
+        <field name="view_mode">calendar,list,form</field>
+    </record>
+
+    <record id="psi_intern_attendance_list_view" model="ir.ui.view">
+        <field name="name">psi.intern.attendance.list</field>
+        <field name="model">psi.intern.attendance</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="intern_id" />
+                <field name="start_datetime" />
+                <field name="end_datetime" />
+                <field name="duration_hours" />
+                <field name="supervisor_id" />
+                <field name="status" />
+                <field name="note" />
+            </list>
+        </field>
+    </record>
+
+    <record id="psi_intern_attendance_form_view" model="ir.ui.view">
+        <field name="name">psi.intern.attendance.form</field>
+        <field name="model">psi.intern.attendance</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button
+                        name="action_view_student_attendances"
+                        type="object"
+                        string="Lista obecnosci praktykanta"
+                        class="btn-primary"
+                    />
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="intern_id" />
+                            <field name="supervisor_id" readonly="1" />
+                            <field name="status" />
+                        </group>
+                        <group>
+                            <field name="start_datetime" />
+                            <field name="end_datetime" />
+                            <field name="duration_hours" readonly="1" />
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="psi_intern_attendance_calendar_view" model="ir.ui.view">
+        <field name="name">psi.intern.attendance.calendar</field>
+        <field name="model">psi.intern.attendance</field>
+        <field name="arch" type="xml">
+            <calendar
+                string="Kalendarz praktyk"
+                date_start="start_datetime"
+                date_stop="end_datetime"
+                color="supervisor_id"
+                mode="month"
+            >
+                <field name="intern_id" />
+                <field name="supervisor_id" />
+                <field name="status" />
+                <field name="note" />
+            </calendar>
+        </field>
+    </record>
+</odoo>

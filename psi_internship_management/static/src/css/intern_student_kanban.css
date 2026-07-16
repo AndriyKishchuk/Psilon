@@ -1,0 +1,55 @@
+.o_kanban_renderer .o_kanban_record {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+.o_kanban_renderer .o_kanban_record::before,
+.o_kanban_renderer .o_kanban_record::after {
+    display: none !important;
+}
+
+.psi_intern_kanban_card {
+    min-height: 320px;
+    max-height: 320px;
+    height: 320px;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow: hidden;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    border-radius: 8px;
+}
+
+.psi_intern_kanban_image_wrap {
+    width: 120px;
+    height: 120px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.psi_intern_kanban_image_wrap img,
+.psi_intern_kanban_image_wrap .o_image {
+    width: 120px !important;
+    height: 120px !important;
+    object-fit: cover;
+    display: block;
+}
+
+.psi_intern_kanban_name {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 12px;
+}
+
+.psi_intern_kanban_line {
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.psi_intern_kanban_status {
+    margin-top: 12px;
+}

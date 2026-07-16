@@ -1,0 +1,295 @@
+<odoo>
+    <record id="psi_intern_student_attendance_summary_action" model="ir.actions.act_window">
+        <field name="name">Plan obecnosci</field>
+        <field name="res_model">psi.intern.student</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="psi_intern_student_attendance_summary_list_view" model="ir.ui.view">
+        <field name="name">psi.intern.student.attendance.summary.list</field>
+        <field name="model">psi.intern.student</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name" string="Praktykant"/>
+                <field name="start_date" string="Data rozpoczecia praktyki"/>
+                <field name="end_date" string="Data zakonczenia praktyki"/>
+                <field name="total_attendance_hours" string="Liczba godzin"/>
+                <field name="supervisor_id" string="Opiekun"/>
+                
+            </list>
+        </field>
+    </record>
+
+    <record id="psi_intern_student_search_view" model="ir.ui.view">
+        <field name="name">psi.intern.student.search</field>
+        <field name="model">psi.intern.student</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="email"/>
+                <field name="school"/>
+                <field name="supervisor_id"/>
+
+                <filter name="filter_new" string="Nowy" domain="[('status', '=', 'new')]"/>
+                <filter name="filter_active" string="Aktywny" domain="[('status', '=', 'active')]"/>
+                <filter name="filter_finished" string="Zakonczony" domain="[('status', '=', 'finished')]"/>
+                <filter name="filter_cancelled" string="Anulowany" domain="[('status', '=', 'cancelled')]"/>
+
+                <group expand="0" string="Group By">
+                    <filter name="group_by_status" string="Status" context="{'group_by': 'status'}"/>
+                    <filter name="group_by_supervisor" string="Opiekun" context="{'group_by': 'supervisor_id'}"/>
+                </group>
+
+                <searchpanel>
+                    
+                    <field name="supervisor_id" string="Opiekun" hierarchize="0"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <record id="psi_intern_student_action" model="ir.actions.act_window">
+        <field name="name">Praktykanci</field>
+        <field name="res_model">psi.intern.student</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="psi_intern_student_search_view"/>
+    </record>
+
+    <record id="psi_intern_student_list_view" model="ir.ui.view">
+        <field name="name">psi.intern.student.list</field>
+        <field name="model">psi.intern.student</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="school"/>
+                <field name="field_of_study"/>
+                <field name="supervisor_id"/>
+                
+            </list>
+        </field>
+    </record>
+
+    <record id="psi_intern_student_form_view" model="ir.ui.view">
+        <field name="name">psi.intern.student.form</field>
+        <field name="model">psi.intern.student</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field
+                        name="status"
+                        widget="statusbar"
+                        statusbar_visible="new,active,finished,cancelled"
+                    />
+                </header>
+
+                <sheet>
+                    <widget
+                        name="web_ribbon"
+                        title="ARCHIVED"
+                        bg_color="text-bg-danger"
+                        invisible="active"
+                    />
+
+                    <div class="d-flex align-items-start gap-4 mb-4">
+                        <div>
+                            <field
+                                name="image_1920"
+                                widget="image"
+                                nolabel="1"
+                                class="oe_avatar"
+                                options="{'size': [180, 180]}"
+                            />
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <group>
+                                <field name="name"/>
+                                <field name="phone"/>
+                                <field name="email"/>
+                                <field name="user_id"/>
+                            </group>
+                        </div>
+                    </div>
+
+                    <notebook>
+                        <page string="Work">
+                            <group>
+                                <group>
+                                    <field name="school"/>
+                                    <field name="field_of_study"/>
+                                    <field name="supervisor_id"/>
+                                </group>
+                                <group>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="required_hours"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Plan obecnosci">
+                            <group>
+                                <field name="total_attendance_hours" readonly="1"/>
+                            </group>
+
+                            <field name="attendance_ids">
+                                <list editable="bottom">
+                                    <field name="start_datetime" string="Data i godzina rozpoczecia"/>
+                                    <field name="end_datetime" string="Data i godzina zakonczenia"/>
+                                    <field name="duration_hours" string="Liczba godzin" readonly="1"/>
+                                    <field name="supervisor_id" string="Opiekun" readonly="1"/>
+                                    
+                                    <field name="note" string="Notatka"/>
+                                </list>
+
+                                <form>
+                                    <group>
+                                        <group>
+                                            <field name="start_datetime"/>
+                                            <field name="end_datetime"/>
+                                            <field name="duration_hours" readonly="1"/>
+                                        </group>
+                                        <group>
+                                            <field name="supervisor_id" readonly="1"/>
+                                            
+                                        </group>
+                                    </group>
+                                    <group>
+                                        <field name="note"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+
+                        <page string="Personal">
+                            <group>
+                                <group>
+                                    <field name="birthdate"/>
+                                    <field name="phone"/>
+                                    <field name="email"/>
+                                </group>
+                                <group>
+                                    <field name="street"/>
+                                    <field name="city"/>
+                                    <field name="zip_code"/>
+                                    <field name="country"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Resume">
+                            <group>
+                                <field name="education_notes"/>
+                                <field name="experience_notes"/>
+                                <field name="skills_notes"/>
+                                <field name="language_ids">
+                                    <list editable="bottom">
+                                        <field name="language"/>
+                                        <field name="level"/>
+                                    </list>
+                                </field>
+                                <field name="resume_file" filename="resume_filename"/>
+                                <field name="resume_filename" invisible="1"/>
+                            </group>
+                        </page>
+
+                        <page string="Documents">
+                            <group>
+                                <field
+                                    name="document_ids"
+                                    widget="many2many_binary"
+                                    options="{'accepted_file_extensions': '.pdf,.doc,.docx,.jpg,.jpeg,.png'}"
+                                />
+                            </group>
+                        </page>
+
+                        <page string="Settings">
+                            <group>
+                                <field name="notes"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="psi_intern_student_kanban_view" model="ir.ui.view">
+        <field name="name">psi.intern.student.kanban</field>
+        <field name="model">psi.intern.student</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <field name="name"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="school"/>
+                
+                <field name="image_1920"/>
+
+                <templates>
+                    <t t-name="card">
+                        <div class="psi_intern_kanban_card">
+                            <div class="psi_intern_kanban_image_wrap">
+                                <field
+                                    name="image_1920"
+                                    widget="image"
+                                    class="oe_kanban_image"
+                                    options="{'size': [120, 120]}"
+                                />
+                            </div>
+
+                            <div class="psi_intern_kanban_name">
+                                <field name="name"/>
+                            </div>
+
+                            <div t-if="record.school.raw_value" class="psi_intern_kanban_line">
+                                <field name="school"/>
+                            </div>
+
+                            <div t-if="record.email.raw_value" class="psi_intern_kanban_line">
+                                <field name="email"/>
+                            </div>
+
+                            <div t-if="record.phone.raw_value" class="psi_intern_kanban_line">
+                                <field name="phone"/>
+                            </div>
+
+                            <div class="psi_intern_kanban_status">
+                                
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="psi_intern_student_calendar_view" model="ir.ui.view">
+        <field name="name">psi.intern.student.calendar</field>
+        <field name="model">psi.intern.student</field>
+        <field name="arch" type="xml">
+            <calendar
+                string="Kalendarz praktyk"
+                date_start="start_date"
+                date_stop="end_date"
+                color="supervisor_id"
+                mode="month"
+            >
+                <field name="name"/>
+                <field name="school"/>
+                <field name="field_of_study"/>
+                <field name="supervisor_id"/>
+                
+            </calendar>
+        </field>
+    </record>
+
+    <record id="psi_intern_student_calendar_action" model="ir.actions.act_window">
+        <field name="name">Kalendarz praktyk</field>
+        <field name="res_model">psi.intern.student</field>
+        <field name="view_mode">calendar,list,form</field>
+        <field name="search_view_id" ref="psi_intern_student_search_view"/>
+    </record>
+</odoo>

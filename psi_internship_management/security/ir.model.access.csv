@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_psi_intern_student,access_psi_intern_student,model_psi_intern_student,base.group_user,1,1,1,1
+access_psi_intern_language,access_psi_intern_language,model_psi_intern_language,base.group_user,1,1,1,1
+access_psi_intern_attendance,access_psi_intern_attendance,model_psi_intern_attendance,base.group_user,1,1,1,1

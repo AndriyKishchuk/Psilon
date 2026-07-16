@@ -1,0 +1,15 @@
+<odoo>
+    <record id="psi_student_profile_action" model="ir.actions.act_window">
+        <field name="name">Moj profil</field>
+        <field name="res_model">psi.intern.student</field>
+        <field name="view_mode">form</field>
+        <field name="domain">[('user_id', '=', uid)]</field>
+    </record>
+
+    <record id="psi_student_attendance_action" model="ir.actions.act_window">
+        <field name="name">Moj plan praktyk</field>
+        <field name="res_model">psi.intern.attendance</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('intern_id.user_id', '=', uid)]</field>
+    </record>
+</odoo>
