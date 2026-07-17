@@ -6,6 +6,17 @@ from odoo.http import request
 
 class InternshipPortalController(http.Controller):
 
+    @staticmethod
+    def _format_hours_label(hours):
+        total_minutes = round((hours or 0.0) * 60)
+        hour_part = total_minutes // 60
+        minute_part = total_minutes % 60
+        if hour_part and minute_part:
+            return f"{hour_part} h {minute_part} min"
+        if hour_part:
+            return f"{hour_part} h"
+        return f"{minute_part} min"
+
     def _get_student_for_current_user(self):
         return request.env["psi.intern.student"].sudo().search(
             [("user_id", "=", request.env.user.id)],
@@ -26,11 +37,16 @@ class InternshipPortalController(http.Controller):
         current_attendance = request.env["psi.intern.attendance"]
         progress_percent = 0
         document_count = 0
+        total_hours_display = self._format_hours_label(0.0)
+        next_attendance_duration_display = self._format_hours_label(0.0)
 
         if student:
             attendances = student.attendance_ids.sorted("start_datetime")
             attendance_count = len(attendances)
             document_count = len(student.document_ids)
+            total_hours_display = self._format_hours_label(
+                student.total_attendance_hours
+            )
             now = fields.Datetime.now()
             current_attendance = attendances.filtered(
                 lambda a: a.start_datetime and not a.end_datetime
@@ -47,6 +63,10 @@ class InternshipPortalController(http.Controller):
                         (student.total_attendance_hours / student.required_hours) * 100
                     ),
                 )
+            if next_attendance:
+                next_attendance_duration_display = self._format_hours_label(
+                    next_attendance.duration_hours
+                )
 
         documents = student.document_ids.sorted(
             key=lambda d: d.create_date or d.id,
@@ -62,6 +82,8 @@ class InternshipPortalController(http.Controller):
             "progress_percent": progress_percent,
             "document_count": document_count,
             "documents": documents,
+            "total_hours_display": total_hours_display,
+            "next_attendance_duration_display": next_attendance_duration_display,
             "message": message,
             "form_values": form_values or {},
         }

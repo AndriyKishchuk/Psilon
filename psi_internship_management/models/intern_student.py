@@ -24,7 +24,7 @@ class InternStudent(models.Model):
     required_hours = fields.Integer(string="Wymagana liczba godzin")
     total_attendance_hours = fields.Float(
         string="Suma godzin",
-        compute="_compute_total_attendance_hours    ",
+        compute="_compute_total_attendance_hours",
         store=True,
     )
     status = fields.Selection(
