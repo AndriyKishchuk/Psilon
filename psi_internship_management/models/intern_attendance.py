@@ -15,7 +15,7 @@ class InternAttendance(models.Model):
     )
     user_id = fields.Many2one("res.users", string="Uzytkownik systemu")
     start_datetime = fields.Datetime(string="Data i godzina rozpoczecia", required=True)
-    end_datetime = fields.Datetime(string="Data i godzina zakonczenia", required=True)
+    end_datetime = fields.Datetime(string="Data i godzina zakonczenia")
     supervisor_id = fields.Many2one(
         "res.users",
         string="Opiekun",
