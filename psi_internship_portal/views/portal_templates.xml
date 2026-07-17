@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="portal_my_home_internship_entry" inherit_id="portal.portal_my_home" priority="30">
+        <xpath expr="//div[@id='portal_common_category']" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/portal/static/src/img/portal-connection.svg'"/>
+                <t t-set="title">Moja praktyka</t>
+                <t t-set="text">Zobacz swoje dane praktyki i plan obecnosci</t>
+                <t t-set="url" t-value="'/my/internship'"/>
+                <t t-set="config_card" t-value="True"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_internship" name="Moja praktyka">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <h2>Moja praktyka</h2>
+
+                <t t-if="student">
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h4><t t-esc="student.name"/></h4>
+                            <p><strong>Status:</strong> <t t-esc="dict(student._fields[&quot;status&quot;].selection).get(student.status)"/></p>
+                            <p><strong>Szkola/Uczelnia:</strong> <t t-esc="student.school or ''"/></p>
+                            <p><strong>Kierunek/Profil:</strong> <t t-esc="student.field_of_study or ''"/></p>
+                            <p><strong>Data rozpoczecia:</strong> <t t-esc="student.start_date or ''"/></p>
+                            <p><strong>Data zakonczenia:</strong> <t t-esc="student.end_date or ''"/></p>
+                            <p><strong>Suma godzin:</strong> <t t-esc="student.total_attendance_hours"/></p>
+
+                            <a href="/my/internship/attendance" class="btn btn-primary mt-2">
+                                Zobacz plan obecnosci
+                            </a>
+                        </div>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="alert alert-warning mt-3">
+                        Nie znaleziono praktykanta przypisanego do tego uzytkownika.
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_my_internship_attendance" name="Plan obecnosci praktykanta">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <h2>Plan obecnosci</h2>
+
+                <t t-if="student">
+                    <p><strong>Praktykant:</strong> <t t-esc="student.name"/></p>
+
+                    <table class="table table-striped mt-3">
+                        <thead>
+                            <tr>
+                                <th>Data i godzina rozpoczecia</th>
+                                <th>Data i godzina zakonczenia</th>
+                                <th>Liczba godzin</th>
+                                <th>Notatka</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="attendances" t-as="attendance">
+                                <tr>
+                                    <td><t t-esc="attendance.start_datetime"/></td>
+                                    <td><t t-esc="attendance.end_datetime"/></td>
+                                    <td><t t-esc="attendance.duration_hours"/></td>
+                                    <td><t t-esc="attendance.note or ''"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </t>
+                <t t-else="">
+                    <div class="alert alert-warning mt-3">
+                        Nie znaleziono praktykanta przypisanego do tego uzytkownika.
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+</odoo>
