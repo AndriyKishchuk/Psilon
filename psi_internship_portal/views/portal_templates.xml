@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <record id="website_menu_internship_register" model="website.menu">
+        <field name="name">Rejestracja praktyk</field>
+        <field name="url">/internship/register</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" eval="45"/>
+    </record>
+
     <template id="portal_my_home_internship_entry" inherit_id="portal.portal_my_home" priority="30">
         <xpath expr="//div[@id='portal_common_category']" position="inside">
             <t t-call="portal.portal_docs_entry">
@@ -12,9 +19,108 @@
         </xpath>
     </template>
 
+    <template id="portal_internship_public_register" name="Publiczna rejestracja praktykanta">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="py-5" style="background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 45%, #ffffff 100%); min-height: 80vh;">
+                    <div class="container py-4 py-lg-5">
+                        <div class="row justify-content-center">
+                            <div class="col-xl-8 col-lg-10">
+                                <div class="text-center mb-5">
+                                    <span class="badge rounded-pill text-bg-light px-3 py-2 mb-3">Portal praktykanta</span>
+                                    <h1 class="display-5 fw-bold mb-3">Rejestracja praktykanta</h1>
+                                    <p class="lead text-muted mb-0">Utworz konto, zapisz podstawowe dane i przejdz od razu do swojego panelu praktyk.</p>
+                                </div>
+
+                                <t t-if="message == 'registered'">
+                                    <div class="alert alert-success rounded-4 border-0 shadow-sm">Rejestracja zakonczona powodzeniem. Mozesz przejsc do panelu praktyk.</div>
+                                </t>
+                                <t t-if="message == 'registration_missing_fields'">
+                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Uzupelnij wszystkie wymagane pola formularza.</div>
+                                </t>
+                                <t t-if="message == 'registration_password_mismatch'">
+                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Haslo i potwierdzenie hasla musza byc identyczne.</div>
+                                </t>
+                                <t t-if="message == 'registration_email_exists'">
+                                    <div class="alert alert-danger rounded-4 border-0 shadow-sm">Uzytkownik z takim adresem e-mail juz istnieje.</div>
+                                </t>
+                                <t t-if="message == 'registration_no_supervisor'">
+                                    <div class="alert alert-danger rounded-4 border-0 shadow-sm">Nie znaleziono aktywnego opiekuna do przypisania praktykanta.</div>
+                                </t>
+
+                                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                                    <div class="card-body p-4 p-lg-5">
+                                        <form action="/internship/register/submit" method="post">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <div class="row g-4">
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">Imie i nazwisko</label>
+                                                    <input type="text" name="name" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('name') or ''" required="required"/>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">Adres e-mail</label>
+                                                    <input type="email" name="email" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('email') or ''" required="required"/>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">Haslo</label>
+                                                    <input type="password" name="password" class="form-control form-control-lg rounded-4" required="required"/>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">Potwierdz haslo</label>
+                                                    <input type="password" name="password_confirm" class="form-control form-control-lg rounded-4" required="required"/>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">Telefon</label>
+                                                    <input type="text" name="phone" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('phone') or '+48'"/>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">Szkola / Uczelnia</label>
+                                                    <input type="text" name="school" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('school') or ''" required="required"/>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">Kierunek / Profil</label>
+                                                    <input type="text" name="field_of_study" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('field_of_study') or ''" required="required"/>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label fw-semibold">Data rozpoczecia</label>
+                                                    <input type="date" name="start_date" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('start_date') or ''"/>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label fw-semibold">Data zakonczenia</label>
+                                                    <input type="date" name="end_date" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('end_date') or ''"/>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">Notatka</label>
+                                                    <textarea name="notes" class="form-control rounded-4" rows="4"><t t-esc="form_values.get('notes') or ''"/></textarea>
+                                                </div>
+                                                <div class="col-12 d-grid d-md-flex justify-content-md-end gap-3">
+                                                    <a href="/web/login" class="btn btn-outline-secondary btn-lg rounded-pill px-4">Mam juz konto</a>
+                                                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5">Zarejestruj sie</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
     <template id="portal_my_internship" name="Moja praktyka">
         <t t-call="portal.portal_layout">
             <div class="container py-4">
+                <t t-if="message == 'registered'">
+                    <div class="alert alert-success rounded-4 border-0 shadow-sm">Rejestracja praktykanta zostala zapisana poprawnie.</div>
+                </t>
+                <t t-if="message == 'registration_missing_fields'">
+                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Uzupelnij imie i nazwisko, szkole oraz kierunek.</div>
+                </t>
+                <t t-if="message == 'registration_no_supervisor'">
+                    <div class="alert alert-danger rounded-4 border-0 shadow-sm">Nie znaleziono aktywnego opiekuna do przypisania praktykanta.</div>
+                </t>
                 <t t-if="message == 'checked_in'">
                     <div class="alert alert-success rounded-4 border-0 shadow-sm">Check in zapisany poprawnie.</div>
                 </t>
@@ -29,6 +135,12 @@
                 </t>
                 <t t-if="message == 'no_student'">
                     <div class="alert alert-danger rounded-4 border-0 shadow-sm">Nie znaleziono praktykanta przypisanego do tego uzytkownika.</div>
+                </t>
+                <t t-if="message == 'upload_success'">
+                    <div class="alert alert-success rounded-4 border-0 shadow-sm">Plik zostal dodany poprawnie.</div>
+                </t>
+                <t t-if="message == 'upload_missing'">
+                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Wybierz plik do przeslania.</div>
                 </t>
 
                 <t t-if="student">
@@ -176,7 +288,7 @@
                                                         <div class="text-muted small text-uppercase fw-semibold mb-2">Aktualny status obecnosci</div>
                                                         <t t-if="current_attendance">
                                                             <div class="fw-semibold mb-1">Jestes aktualnie na praktyce</div>
-                                                            <div class="text-muted small">Start: <t t-esc="current_attendance.start_datetime"/></div>
+                                                            <div class="text-muted small">Start: <span t-field="current_attendance.start_datetime"/></div>
                                                         </t>
                                                         <t t-else="">
                                                             <div class="fw-semibold mb-1">Brak aktywnego wejscia</div>
@@ -242,10 +354,102 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="card border-0 shadow-sm rounded-4 mt-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                                <div>
+                                    <div class="text-uppercase text-muted small fw-semibold">Dokumenty</div>
+                                    <h4 class="mt-2 mb-0">Pliki praktykanta</h4>
+                                </div>
+                            </div>
+
+                            <form action="/my/internship/upload_document" method="post" enctype="multipart/form-data" class="mb-4">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-lg-9">
+                                        <label class="form-label fw-semibold">Dodaj plik</label>
+                                        <input type="file" name="document" class="form-control rounded-4"/>
+                                    </div>
+                                    <div class="col-lg-3 d-grid">
+                                        <button type="submit" class="btn btn-primary rounded-4 py-2 fw-semibold">Przeslij plik</button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <t t-if="documents">
+                                <div class="list-group list-group-flush">
+                                    <t t-foreach="documents" t-as="document">
+                                        <div class="list-group-item px-0 py-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-3">
+                                            <div>
+                                                <div class="fw-semibold"><t t-esc="document.name"/></div>
+                                                <div class="text-muted small">Dodano: <span t-field="document.create_date"/></div>
+                                            </div>
+                                            <a t-att-href="'/web/content/%s?download=true' % document.id" class="btn btn-outline-secondary rounded-pill px-4">
+                                                Pobierz
+                                            </a>
+                                        </div>
+                                    </t>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="rounded-4 p-4 text-center text-muted" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
+                                    Nie masz jeszcze zadnych dodanych plikow.
+                                </div>
+                            </t>
+                        </div>
+                    </div>
                 </t>
                 <t t-else="">
-                    <div class="alert alert-warning rounded-4 shadow-sm border-0 p-4">
-                        Nie znaleziono praktykanta przypisanego do tego uzytkownika.
+                    <div class="row justify-content-center">
+                        <div class="col-xl-8 col-lg-10">
+                            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                                <div class="card-body p-4 p-lg-5">
+                                    <div class="text-center mb-4">
+                                        <span class="badge rounded-pill text-bg-light px-3 py-2 mb-3">Pierwsze logowanie</span>
+                                        <h1 class="display-6 fw-bold mb-2">Rejestracja praktykanta</h1>
+                                        <p class="text-muted mb-0">Uzupelnij podstawowe dane, aby utworzyc swoj profil praktyk i przejsc do panelu.</p>
+                                    </div>
+
+                                    <form action="/my/internship/register" method="post">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <div class="row g-4">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Imie i nazwisko</label>
+                                                <input type="text" name="name" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('name') or request.env.user.name or ''" required="required"/>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Telefon</label>
+                                                <input type="text" name="phone" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('phone') or '+48'"/>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Szkola / Uczelnia</label>
+                                                <input type="text" name="school" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('school') or ''" required="required"/>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Kierunek / Profil</label>
+                                                <input type="text" name="field_of_study" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('field_of_study') or ''" required="required"/>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Data rozpoczecia praktyki</label>
+                                                <input type="date" name="start_date" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('start_date') or ''"/>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Data zakonczenia praktyki</label>
+                                                <input type="date" name="end_date" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('end_date') or ''"/>
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label fw-semibold">Notatka</label>
+                                                <textarea name="notes" class="form-control rounded-4" rows="4"><t t-esc="form_values.get('notes') or ''"/></textarea>
+                                            </div>
+                                            <div class="col-12 d-grid d-md-flex justify-content-md-end">
+                                                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5">Zarejestruj praktyke</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </t>
             </div>
@@ -297,10 +501,55 @@
                     <div class="rounded-4 p-4 text-center text-muted shadow-sm" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
                         Nie masz jeszcze zadnych wpisow obecnosci.
                     </div>
+
+                    <div class="card border-0 shadow-sm rounded-4 mt-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                                <div>
+                                    <div class="text-uppercase text-muted small fw-semibold">Dokumenty</div>
+                                    <h4 class="mt-2 mb-0">Pliki praktykanta</h4>
+                                </div>
+                            </div>
+
+                            <form action="/my/internship/upload_document" method="post" enctype="multipart/form-data" class="mb-4">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-lg-9">
+                                        <label class="form-label fw-semibold">Dodaj plik</label>
+                                        <input type="file" name="document" class="form-control rounded-4"/>
+                                    </div>
+                                    <div class="col-lg-3 d-grid">
+                                        <button type="submit" class="btn btn-primary rounded-4 py-2 fw-semibold">Przeslij plik</button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <t t-if="documents">
+                                <div class="list-group list-group-flush">
+                                    <t t-foreach="documents" t-as="document">
+                                        <div class="list-group-item px-0 py-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-3">
+                                            <div>
+                                                <div class="fw-semibold"><t t-esc="document.name"/></div>
+                                                <div class="text-muted small">Dodano: <span t-field="document.create_date"/></div>
+                                            </div>
+                                            <a t-att-href="'/web/content/%s?download=true' % document.id" class="btn btn-outline-secondary rounded-pill px-4">
+                                                Pobierz
+                                            </a>
+                                        </div>
+                                    </t>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="rounded-4 p-4 text-center text-muted" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
+                                    Nie masz jeszcze zadnych dodanych plikow.
+                                </div>
+                            </t>
+                        </div>
+                    </div>
                 </t>
                 <t t-else="">
                     <div class="alert alert-warning rounded-4 shadow-sm border-0 p-4">
-                        Nie znaleziono praktykanta przypisanego do tego uzytkownika.
+                        Najpierw uzupelnij rejestracje praktykanta w panelu Moja praktyka.
                     </div>
                 </t>
             </div>
