@@ -12,7 +12,7 @@
             <t t-call="portal.portal_docs_entry">
                 <t t-set="icon" t-value="'/portal/static/src/img/portal-connection.svg'"/>
                 <t t-set="title">Moja praktyka</t>
-                <t t-set="text">Sprawdz swoje godziny, plan obecnosci i najblizsze terminy</t>
+                <t t-set="text">Sprawdź swoje godziny, plan obecności i najbliższe terminy</t>
                 <t t-set="url" t-value="'/my/internship'"/>
                 <t t-set="config_card" t-value="True"/>
             </t>
@@ -29,29 +29,29 @@
                                 <div class="text-center mb-5">
                                     <span class="badge rounded-pill text-bg-light px-3 py-2 mb-3">Portal praktykanta</span>
                                     <h1 class="display-5 fw-bold mb-3">Rejestracja praktykanta</h1>
-                                    <p class="lead text-muted mb-0">Utworz konto, zapisz podstawowe dane i przejdz od razu do swojego panelu praktyk.</p>
+                                    <p class="lead text-muted mb-0">Utwórz konto, uzupełnij podstawowe dane i przejdź od razu do swojego panelu praktyk.</p>
                                 </div>
 
                                 <t t-if="message == 'registered'">
-                                    <div class="alert alert-success rounded-4 border-0 shadow-sm">Rejestracja zakonczona powodzeniem. Mozesz przejsc do panelu praktyk.</div>
+                                    <div class="alert alert-success rounded-4 border-0 shadow-sm">Rejestracja zakończyła się powodzeniem. Możesz przejść do panelu praktyk.</div>
                                 </t>
                                 <t t-if="message == 'registration_missing_fields'">
-                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Uzupelnij wszystkie wymagane pola formularza.</div>
+                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Uzupełnij wszystkie wymagane pola formularza.</div>
                                 </t>
                                 <t t-if="message == 'registration_password_mismatch'">
-                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Haslo i potwierdzenie hasla musza byc identyczne.</div>
+                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Hasło i potwierdzenie hasła muszą być identyczne.</div>
                                 </t>
                                 <t t-if="message == 'registration_invalid_phone'">
-                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Numer telefonu musi zawierac dokladnie 11 cyfr. Mozesz uzyc formatu, np. +48 511 372 802.</div>
+                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Numer telefonu musi zawierać dokładnie 11 cyfr. Możesz użyć formatu, np. +48 511 372 802.</div>
                                 </t>
                                 <t t-if="message == 'registration_invalid_dates'">
-                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Data zakonczenia nie moze byc wczesniejsza niz data rozpoczecia.</div>
+                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Data zakończenia nie może być wcześniejsza niż data rozpoczęcia.</div>
                                 </t>
                                 <t t-if="message == 'registration_email_exists'">
-                                    <div class="alert alert-danger rounded-4 border-0 shadow-sm">Uzytkownik z takim adresem e-mail juz istnieje.</div>
+                                    <div class="alert alert-danger rounded-4 border-0 shadow-sm">Użytkownik z takim adresem e-mail już istnieje.</div>
                                 </t>
                                 <t t-if="message == 'registration_invalid_required_hours'">
-                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Podaj poprawna wymagana liczbe godzin wieksza od zera.</div>
+                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Podaj poprawną wymaganą liczbę godzin większą od zera.</div>
                                 </t>
                                 <t t-if="message == 'registration_no_supervisor'">
                                     <div class="alert alert-danger rounded-4 border-0 shadow-sm">Nie znaleziono aktywnego opiekuna do przypisania praktykanta.</div>
@@ -63,7 +63,7 @@
                                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                             <div class="row g-4">
                                                 <div class="col-md-6">
-                                                    <label class="form-label fw-semibold">Imie i nazwisko</label>
+                                                    <label class="form-label fw-semibold">Imię i nazwisko</label>
                                                     <input type="text" name="name" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('name') or ''" required="required"/>
                                                 </div>
                                                 <div class="col-md-6">
@@ -71,11 +71,11 @@
                                                     <input type="email" name="email" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('email') or ''" required="required"/>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label fw-semibold">Haslo</label>
+                                                    <label class="form-label fw-semibold">Hasło</label>
                                                     <input type="password" name="password" class="form-control form-control-lg rounded-4" required="required"/>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label fw-semibold">Potwierdz haslo</label>
+                                                    <label class="form-label fw-semibold">Potwierdź hasło</label>
                                                     <input type="password" name="password_confirm" class="form-control form-control-lg rounded-4" required="required"/>
                                                 </div>
                                                 <div class="col-md-6">
@@ -83,7 +83,7 @@
                                                     <input type="text" name="phone" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('phone') or '+48'"/>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label fw-semibold">Szkola / Uczelnia</label>
+                                                    <label class="form-label fw-semibold">Szkoła / Uczelnia</label>
                                                     <input type="text" name="school" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('school') or ''" required="required"/>
                                                 </div>
                                                 <div class="col-md-6">
@@ -95,11 +95,11 @@
                                                     <input type="number" name="required_hours" min="1" step="1" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('required_hours') or ''" required="required"/>
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <label class="form-label fw-semibold">Data rozpoczecia</label>
+                                                    <label class="form-label fw-semibold">Data rozpoczęcia</label>
                                                     <input type="date" name="start_date" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('start_date') or ''"/>
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <label class="form-label fw-semibold">Data zakonczenia</label>
+                                                    <label class="form-label fw-semibold">Data zakończenia</label>
                                                     <input type="date" name="end_date" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('end_date') or ''"/>
                                                 </div>
                                                 <div class="col-12">
@@ -107,8 +107,8 @@
                                                     <textarea name="notes" class="form-control rounded-4" rows="4"><t t-esc="form_values.get('notes') or ''"/></textarea>
                                                 </div>
                                                 <div class="col-12 d-grid d-md-flex justify-content-md-end gap-3">
-                                                    <a href="/web/login" class="btn btn-outline-secondary btn-lg rounded-pill px-4">Mam juz konto</a>
-                                                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5">Zarejestruj sie</button>
+                                                    <a href="/web/login" class="btn btn-outline-secondary btn-lg rounded-pill px-4">Mam już konto</a>
+                                                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5">Zarejestruj się</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -126,10 +126,10 @@
         <t t-call="portal.portal_layout">
             <div class="container py-4">
                 <t t-if="message == 'registered'">
-                    <div class="alert alert-success rounded-4 border-0 shadow-sm">Rejestracja praktykanta zostala zapisana poprawnie.</div>
+                    <div class="alert alert-success rounded-4 border-0 shadow-sm">Rejestracja praktykanta została zapisana poprawnie.</div>
                 </t>
                 <t t-if="message == 'registration_missing_fields'">
-                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Uzupelnij imie i nazwisko, szkole oraz kierunek.</div>
+                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Uzupełnij imię i nazwisko, szkołę oraz kierunek.</div>
                 </t>
                 <t t-if="message == 'registration_no_supervisor'">
                     <div class="alert alert-danger rounded-4 border-0 shadow-sm">Nie znaleziono aktywnego opiekuna do przypisania praktykanta.</div>
@@ -141,19 +141,19 @@
                     <div class="alert alert-success rounded-4 border-0 shadow-sm">Check out zapisany poprawnie.</div>
                 </t>
                 <t t-if="message == 'already_checked_in'">
-                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Masz juz aktywny wpis obecnosci.</div>
+                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Masz już aktywny wpis obecności.</div>
                 </t>
                 <t t-if="message == 'no_open_attendance'">
-                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Nie ma aktywnego wpisu do zamkniecia.</div>
+                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Nie ma aktywnego wpisu do zamknięcia.</div>
                 </t>
                 <t t-if="message == 'no_student'">
-                    <div class="alert alert-danger rounded-4 border-0 shadow-sm">Nie znaleziono praktykanta przypisanego do tego uzytkownika.</div>
+                    <div class="alert alert-danger rounded-4 border-0 shadow-sm">Nie znaleziono praktykanta przypisanego do tego użytkownika.</div>
                 </t>
                 <t t-if="message == 'upload_success'">
-                    <div class="alert alert-success rounded-4 border-0 shadow-sm">Plik zostal dodany poprawnie.</div>
+                    <div class="alert alert-success rounded-4 border-0 shadow-sm">Plik został dodany poprawnie.</div>
                 </t>
                 <t t-if="message == 'upload_missing'">
-                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Wybierz plik do przeslania.</div>
+                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Wybierz plik do przesłania.</div>
                 </t>
 
                 <t t-if="student">
@@ -171,7 +171,7 @@
                                     </t>
                                 </div>
                                 <h1 class="fw-bold mb-2" style="font-size: 2.35rem;">Witaj, <t t-esc="student.name"/></h1>
-                                <p class="mb-0 opacity-75">Twoj panel praktyk w jednym miejscu: profil, godziny, obecnosci i szybkie akcje.</p>
+                                <p class="mb-0 opacity-75">Twój panel praktyk w jednym miejscu: profil, godziny, obecności i szybkie akcje.</p>
                             </div>
                             <div class="col-lg-4 text-lg-end">
                                 <t t-if="student.image_1920">
@@ -191,10 +191,10 @@
                                     Panel
                                 </a>
                                 <a href="/my/internship/profile" class="btn btn-outline-secondary rounded-pill px-3 py-2">
-                                    Moj profil
+                                    Mój profil
                                 </a>
                                 <a href="/my/internship/attendance" class="btn btn-outline-secondary rounded-pill px-3 py-2">
-                                    Plan obecnosci
+                                    Plan obecności
                                 </a>
                                 <a href="/my/internship/documents" class="btn btn-outline-secondary rounded-pill px-3 py-2">
                                     Dokumenty
@@ -209,7 +209,7 @@
                                 <div class="card-body p-3 p-lg-4">
                                     <div class="d-flex justify-content-between align-items-start gap-3 mb-3 flex-wrap">
                                         <div>
-                                            <div class="text-uppercase text-muted small fw-semibold">Moj profil</div>
+                                            <div class="text-uppercase text-muted small fw-semibold">Mój profil</div>
                                             <h3 class="mt-2 mb-1 fs-4"><t t-esc="student.name"/></h3>
                                             <div class="text-muted">Twoje podstawowe dane i informacje o praktyce.</div>
                                         </div>
@@ -219,7 +219,7 @@
                                     <div class="row g-2">
                                         <div class="col-md-6">
                                             <div class="rounded-4 p-3 h-100" style="background: #f8fafc; border: 1px solid #e2e8f0;">
-                                                <div class="text-muted small">Szkola / Uczelnia</div>
+                                                <div class="text-muted small">Szkoła / Uczelnia</div>
                                                 <div class="fw-semibold"><t t-esc="student.school or '-'"/></div>
                                             </div>
                                         </div>
@@ -231,13 +231,13 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="rounded-4 p-3 h-100" style="background: #f8fafc; border: 1px solid #e2e8f0;">
-                                                <div class="text-muted small">Data rozpoczecia</div>
+                                                <div class="text-muted small">Data rozpoczęcia</div>
                                                 <div class="fw-semibold"><t t-esc="student.start_date or '-'"/></div>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="rounded-4 p-3 h-100" style="background: #f8fafc; border: 1px solid #e2e8f0;">
-                                                <div class="text-muted small">Data zakonczenia</div>
+                                                <div class="text-muted small">Data zakończenia</div>
                                                 <div class="fw-semibold"><t t-esc="student.end_date or '-'"/></div>
                                             </div>
                                         </div>
@@ -259,12 +259,12 @@
                                 <div class="card-body p-3 p-lg-4">
                                     <div class="d-flex justify-content-between align-items-start gap-3 mb-3 flex-wrap">
                                         <div>
-                                            <div class="text-uppercase text-muted small fw-semibold">Plan obecnosci</div>
+                                            <div class="text-uppercase text-muted small fw-semibold">Plan obecności</div>
                                             <h3 class="mt-2 mb-1 fs-4">Twoje wpisy i godziny</h3>
-                                            <div class="text-muted">Sprawdzaj terminy, kontroluj obecnosci i zarzadzaj swoim dniem praktyk.</div>
+                                            <div class="text-muted">Sprawdzaj terminy, kontroluj obecności i zarządzaj swoim dniem praktyk.</div>
                                         </div>
                                         <span class="badge rounded-pill bg-white text-dark px-3 py-2 shadow-sm">
-                                            <t t-esc="attendance_count"/> wpisy
+                                            <t t-esc="attendance_count"/> wpisów
                                         </span>
                                     </div>
 
@@ -277,7 +277,7 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="rounded-4 bg-white p-3 h-100 shadow-sm">
-                                                <div class="text-muted small">Obecnosci</div>
+                                                <div class="text-muted small">Obecności</div>
                                                 <div class="fs-4 fw-bold"><t t-esc="attendance_count"/></div>
                                             </div>
                                         </div>
@@ -291,7 +291,7 @@
 
                                     <t t-if="next_attendance">
                                         <div class="rounded-4 bg-white p-3 shadow-sm mb-3">
-                                            <div class="text-uppercase text-muted small fw-semibold mb-2">Najblizszy termin</div>
+                                            <div class="text-uppercase text-muted small fw-semibold mb-2">Najbliższy termin</div>
                                             <div class="row g-2">
                                                 <div class="col-md-4">
                                                     <div class="text-muted small">Start</div>
@@ -313,9 +313,9 @@
                                     </t>
                                     <t t-else="">
                                         <div class="rounded-4 bg-white p-3 shadow-sm mb-3">
-                                            <div class="text-uppercase text-muted small fw-semibold mb-2">Najblizszy termin</div>
-                                            <div class="fw-semibold mb-1">Brak przyszlych wpisow</div>
-                                            <div class="text-muted small">Gdy pojawi sie nowy termin w planie, zobaczysz go tutaj od razu.</div>
+                                            <div class="text-uppercase text-muted small fw-semibold mb-2">Najbliższy termin</div>
+                                            <div class="fw-semibold mb-1">Brak przyszłych wpisów</div>
+                                            <div class="text-muted small">Gdy pojawi się nowy termin w planie, zobaczysz go tutaj od razu.</div>
                                         </div>
                                     </t>
 
@@ -329,7 +329,7 @@
                             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
                                 <div>
                                     <div class="text-uppercase text-muted small fw-semibold">Szybkie akcje</div>
-                                    <h4 class="mt-2 mb-0">Obecnosc i kontakt</h4>
+                                    <h4 class="mt-2 mb-0">Obecność i kontakt</h4>
                                 </div>
                             </div>
 
@@ -355,14 +355,14 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="rounded-4 p-4 h-100" style="background: #f8fafc; border: 1px solid #e2e8f0;">
-                                        <div class="text-muted small text-uppercase fw-semibold mb-2">Aktualny status obecnosci</div>
+                                            <div class="text-muted small text-uppercase fw-semibold mb-2">Aktualny status obecności</div>
                                         <t t-if="current_attendance">
-                                            <div class="fw-semibold mb-1">Jestes aktualnie na praktyce</div>
+                                            <div class="fw-semibold mb-1">Jesteś aktualnie na praktykach</div>
                                             <div class="text-muted small">Start: <span t-field="current_attendance.start_datetime"/></div>
                                         </t>
                                         <t t-else="">
-                                            <div class="fw-semibold mb-1">Brak aktywnego wejscia</div>
-                                            <div class="text-muted small">Mozesz rozpoczac praktyke przyciskiem Check in.</div>
+                                            <div class="fw-semibold mb-1">Brak aktywnego wejścia</div>
+                                            <div class="text-muted small">Możesz rozpocząć praktyki przyciskiem Check in.</div>
                                         </t>
                                     </div>
                                 </div>
@@ -371,7 +371,7 @@
                                         <div class="text-muted small text-uppercase fw-semibold mb-2">Kontakt do opiekuna</div>
                                         <t t-if="student.supervisor_id">
                                             <div class="fw-semibold mb-1"><t t-esc="student.supervisor_id.name"/></div>
-                                            <div class="text-muted small"><t t-esc="student.supervisor_id.email or 'Brak e-maila'"/></div>
+                                            <div class="text-muted small"><t t-esc="student.supervisor_id.email or 'Brak adresu e-mail'"/></div>
                                         </t>
                                         <t t-else="">
                                             <div class="text-muted small">Nie przypisano jeszcze opiekuna praktyk.</div>
@@ -391,14 +391,14 @@
                                     <div class="text-center mb-4">
                                         <span class="badge rounded-pill text-bg-light px-3 py-2 mb-3">Pierwsze logowanie</span>
                                         <h1 class="display-6 fw-bold mb-2">Rejestracja praktykanta</h1>
-                                        <p class="text-muted mb-0">Uzupelnij podstawowe dane, aby utworzyc swoj profil praktyk i przejsc do panelu.</p>
+                                        <p class="text-muted mb-0">Uzupełnij podstawowe dane, aby utworzyć swój profil praktyk i przejść do panelu.</p>
                                     </div>
 
                                     <form action="/my/internship/register" method="post">
                                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                         <div class="row g-4">
                                             <div class="col-md-6">
-                                                <label class="form-label fw-semibold">Imie i nazwisko</label>
+                                                <label class="form-label fw-semibold">Imię i nazwisko</label>
                                                 <input type="text" name="name" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('name') or request.env.user.name or ''" required="required"/>
                                             </div>
                                             <div class="col-md-6">
@@ -406,7 +406,7 @@
                                                 <input type="text" name="phone" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('phone') or '+48'"/>
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label fw-semibold">Szkola / Uczelnia</label>
+                                                <label class="form-label fw-semibold">Szkoła / Uczelnia</label>
                                                 <input type="text" name="school" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('school') or ''" required="required"/>
                                             </div>
                                             <div class="col-md-6">
@@ -414,11 +414,11 @@
                                                 <input type="text" name="field_of_study" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('field_of_study') or ''" required="required"/>
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label fw-semibold">Data rozpoczecia praktyki</label>
+                                                <label class="form-label fw-semibold">Data rozpoczęcia praktyki</label>
                                                 <input type="date" name="start_date" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('start_date') or ''"/>
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label fw-semibold">Data zakonczenia praktyki</label>
+                                                <label class="form-label fw-semibold">Data zakończenia praktyki</label>
                                                 <input type="date" name="end_date" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('end_date') or ''"/>
                                             </div>
                                             <div class="col-12">
@@ -426,7 +426,7 @@
                                                 <textarea name="notes" class="form-control rounded-4" rows="4"><t t-esc="form_values.get('notes') or ''"/></textarea>
                                             </div>
                                             <div class="col-12 d-grid d-md-flex justify-content-md-end">
-                                                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5">Zarejestruj praktyke</button>
+                                                <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5">Zarejestruj praktykę</button>
                                             </div>
                                         </div>
                                     </form>
@@ -439,17 +439,17 @@
         </t>
     </template>
 
-    <template id="portal_my_internship_attendance" name="Plan obecnosci praktykanta">
+    <template id="portal_my_internship_attendance" name="Plan obecności praktykanta">
         <t t-call="portal.portal_layout">
             <div class="container py-4">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
                     <div>
-                        <h2 class="mb-1">Plan obecnosci</h2>
+                        <h2 class="mb-1">Plan obecności</h2>
                         <t t-if="student">
                             <div class="text-muted">Praktykant: <span class="fw-semibold text-dark"><t t-esc="student.name"/></span></div>
                         </t>
                         </div>
-                        <a href="/my/internship" class="btn btn-outline-secondary rounded-pill px-4">Wroc do panelu</a>
+                        <a href="/my/internship" class="btn btn-outline-secondary rounded-pill px-4">Wróć do panelu</a>
                     </div>
 
                     <div class="card border-0 shadow-sm rounded-4 mb-4">
@@ -459,10 +459,10 @@
                                     Panel
                                 </a>
                                 <a href="/my/internship/profile" class="btn btn-outline-secondary rounded-pill px-4 py-2">
-                                    Moj profil
+                                    Mój profil
                                 </a>
                                 <a href="/my/internship/attendance" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
-                                    Plan obecnosci
+                                    Plan obecności
                                 </a>
                                 <a href="/my/internship/documents" class="btn btn-outline-secondary rounded-pill px-4 py-2">
                                     Dokumenty
@@ -477,8 +477,8 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="ps-4">Data i godzina rozpoczecia</th>
-                                        <th>Data i godzina zakonczenia</th>
+                                        <th class="ps-4">Data i godzina rozpoczęcia</th>
+                                        <th>Data i godzina zakończenia</th>
                                         <th>Liczba godzin</th>
                                         <th>Status</th>
                                         <th class="pe-4">Notatka</th>
@@ -501,13 +501,13 @@
                 </t>
                 <t t-elif="student">
                     <div class="rounded-4 p-4 text-center text-muted shadow-sm" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
-                        Nie masz jeszcze zadnych wpisow obecnosci.
+                        Nie masz jeszcze żadnych wpisów obecności.
                     </div>
 
                 </t>
                 <t t-else="">
                     <div class="alert alert-warning rounded-4 shadow-sm border-0 p-4">
-                        Najpierw uzupelnij rejestracje praktykanta w panelu Moja praktyka.
+                        Najpierw uzupełnij rejestrację praktykanta w panelu Moja praktyka.
                     </div>
                 </t>
             </div>
@@ -520,13 +520,13 @@
                 <t t-if="student">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
                         <div>
-                            <div class="text-uppercase text-muted small fw-semibold">Moj profil</div>
+                            <div class="text-uppercase text-muted small fw-semibold">Mój profil</div>
                             <h1 class="mb-1"><t t-esc="student.name"/></h1>
                             <div class="text-muted">Profil praktykanta i podstawowe informacje o praktyce</div>
                         </div>
                         <div class="d-flex flex-wrap gap-2">
-                            <a href="/my/internship" class="btn btn-outline-secondary rounded-pill px-4">Wroc do panelu</a>
-                            <a href="/my/internship/attendance" class="btn btn-primary rounded-pill px-4">Plan obecnosci</a>
+                            <a href="/my/internship" class="btn btn-outline-secondary rounded-pill px-4">Wróć do panelu</a>
+                            <a href="/my/internship/attendance" class="btn btn-primary rounded-pill px-4">Plan obecności</a>
                         </div>
                     </div>
 
@@ -537,10 +537,10 @@
                                     Panel
                                 </a>
                                 <a href="/my/internship/profile" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
-                                    Moj profil
+                                    Mój profil
                                 </a>
                                 <a href="/my/internship/attendance" class="btn btn-outline-secondary rounded-pill px-4 py-2">
-                                    Plan obecnosci
+                                    Plan obecności
                                 </a>
                                 <a href="/my/internship/documents" class="btn btn-outline-secondary rounded-pill px-4 py-2">
                                     Dokumenty
@@ -590,7 +590,7 @@
                                         <div class="card-body p-4">
                                             <div class="text-muted small text-uppercase fw-semibold mb-2">Suma godzin</div>
                                             <div class="display-6 fw-bold"><t t-esc="total_hours_display"/></div>
-                                            <div class="text-muted small mt-2">Lacznie przepracowane</div>
+                                            <div class="text-muted small mt-2">Łącznie przepracowane</div>
                                         </div>
                                     </div>
                                 </div>
@@ -620,7 +620,7 @@
                                             <div class="row g-3">
                                                 <div class="col-md-6">
                                                     <div class="rounded-4 bg-light p-3 h-100">
-                                                        <div class="text-muted small">Szkola / Uczelnia</div>
+                                                <div class="text-muted small">Szkoła / Uczelnia</div>
                                                         <div class="fw-semibold"><t t-esc="student.school or '-'"/></div>
                                                     </div>
                                                 </div>
@@ -632,13 +632,13 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="rounded-4 bg-light p-3 h-100">
-                                                        <div class="text-muted small">Data rozpoczecia</div>
+                                                <div class="text-muted small">Data rozpoczęcia</div>
                                                         <div class="fw-semibold"><t t-esc="student.start_date or '-'"/></div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="rounded-4 bg-light p-3 h-100">
-                                                        <div class="text-muted small">Data zakonczenia</div>
+                                                <div class="text-muted small">Data zakończenia</div>
                                                         <div class="fw-semibold"><t t-esc="student.end_date or '-'"/></div>
                                                     </div>
                                                 </div>
@@ -698,7 +698,7 @@
                 </t>
                 <t t-else="">
                     <div class="alert alert-warning rounded-4 shadow-sm border-0 p-4">
-                        Najpierw uzupelnij rejestracje praktykanta w panelu Moja praktyka.
+                        Najpierw uzupełnij rejestrację praktykanta w panelu Moja praktyka.
                     </div>
                 </t>
             </div>
@@ -713,9 +713,9 @@
                         <div>
                             <div class="text-uppercase text-muted small fw-semibold">Dokumenty</div>
                             <h1 class="mb-1">Pliki praktykanta</h1>
-                            <div class="text-muted">Przesylaj i pobieraj dokumenty zwiazane z praktyka.</div>
+                            <div class="text-muted">Przesyłaj i pobieraj dokumenty związane z praktyką.</div>
                         </div>
-                        <a href="/my/internship" class="btn btn-outline-secondary rounded-pill px-4">Wroc do panelu</a>
+                        <a href="/my/internship" class="btn btn-outline-secondary rounded-pill px-4">Wróć do panelu</a>
                     </div>
 
                     <div class="card border-0 shadow-sm rounded-4 mb-4">
@@ -725,10 +725,10 @@
                                     Panel
                                 </a>
                                 <a href="/my/internship/profile" class="btn btn-outline-secondary rounded-pill px-4 py-2">
-                                    Moj profil
+                                    Mój profil
                                 </a>
                                 <a href="/my/internship/attendance" class="btn btn-outline-secondary rounded-pill px-4 py-2">
-                                    Plan obecnosci
+                                    Plan obecności
                                 </a>
                                 <a href="/my/internship/documents" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
                                     Dokumenty
@@ -745,7 +745,7 @@
                                     <h4 class="mt-2 mb-0">Pliki praktykanta</h4>
                                 </div>
                                 <span class="badge rounded-pill text-bg-light px-3 py-2">
-                                    <t t-esc="document_count"/> plikow
+                                    <t t-esc="document_count"/> plików
                                 </span>
                             </div>
 
@@ -757,7 +757,7 @@
                                         <input type="file" name="document" class="form-control rounded-4"/>
                                     </div>
                                     <div class="col-lg-3 d-grid">
-                                        <button type="submit" class="btn btn-primary rounded-4 py-2 fw-semibold">Przeslij plik</button>
+                                        <button type="submit" class="btn btn-primary rounded-4 py-2 fw-semibold">Prześlij plik</button>
                                     </div>
                                 </div>
                             </form>
@@ -779,7 +779,7 @@
                             </t>
                             <t t-else="">
                                 <div class="rounded-4 p-4 text-center text-muted" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
-                                    Nie masz jeszcze zadnych dodanych plikow.
+                                    Nie masz jeszcze żadnych dodanych plików.
                                 </div>
                             </t>
                         </div>
@@ -787,7 +787,7 @@
                 </t>
                 <t t-else="">
                     <div class="alert alert-warning rounded-4 shadow-sm border-0 p-4">
-                        Najpierw uzupelnij rejestracje praktykanta w panelu Moja praktyka.
+                        Najpierw uzupełnij rejestrację praktykanta w panelu Moja praktyka.
                     </div>
                 </t>
             </div>
