@@ -1,10 +1,16 @@
 import base64
+import re
 
 from odoo import fields, http
 from odoo.http import request
 
 
 class InternshipPortalController(http.Controller):
+
+    @staticmethod
+    def _is_valid_phone(phone):
+        cleaned_phone = (phone or "").replace(" ", "").replace("+", "")
+        return cleaned_phone.isdigit() and len(cleaned_phone) == 11
 
     @staticmethod
     def _format_hours_label(hours):
@@ -214,6 +220,20 @@ class InternshipPortalController(http.Controller):
             required_hours = int(required_hours_raw)
         except ValueError:
             required_hours = 0
+
+        if phone and not self._is_valid_phone(phone):
+            values = self._get_public_registration_values(
+                message="registration_invalid_phone",
+                form_values=form_values,
+            )
+            return request.render("psi_internship_portal.portal_internship_public_register", values)
+
+        if start_date and end_date and end_date < start_date:
+            values = self._get_public_registration_values(
+                message="registration_invalid_dates",
+                form_values=form_values,
+            )
+            return request.render("psi_internship_portal.portal_internship_public_register", values)
 
         if required_hours <= 0:
             values = self._get_public_registration_values(

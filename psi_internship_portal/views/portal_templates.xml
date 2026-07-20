@@ -41,6 +41,12 @@
                                 <t t-if="message == 'registration_password_mismatch'">
                                     <div class="alert alert-warning rounded-4 border-0 shadow-sm">Haslo i potwierdzenie hasla musza byc identyczne.</div>
                                 </t>
+                                <t t-if="message == 'registration_invalid_phone'">
+                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Numer telefonu musi zawierac dokladnie 11 cyfr. Mozesz uzyc formatu, np. +48 511 372 802.</div>
+                                </t>
+                                <t t-if="message == 'registration_invalid_dates'">
+                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Data zakonczenia nie moze byc wczesniejsza niz data rozpoczecia.</div>
+                                </t>
                                 <t t-if="message == 'registration_email_exists'">
                                     <div class="alert alert-danger rounded-4 border-0 shadow-sm">Uzytkownik z takim adresem e-mail juz istnieje.</div>
                                 </t>
