@@ -6,6 +6,7 @@
     "depends": ["base"],
     "data": [
         "security/ir.model.access.csv",
+        "views/intern_application_views.xml",
         "views/intern_student_views.xml",
         "views/intern_attendance_views.xml",
         "views/psi_internship_management_menus.xml",

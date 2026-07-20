@@ -260,6 +260,23 @@ class InternshipPortalController(http.Controller):
             )
             return request.render("psi_internship_portal.portal_internship_public_register", values)
 
+        existing_application = request.env["psi.intern.application"].sudo().search(
+            [
+                ("email", "=", email),
+                ("status", "=", "new"),
+            ],
+            limit=1,
+        )
+        if existing_application:
+            values = self._get_public_registration_values(
+                message="registration_application_exists",
+                form_values=form_values,
+            )
+            return request.render(
+                "psi_internship_portal.portal_internship_public_register",
+                values,
+            )
+
         supervisor = self._get_default_supervisor()
         if not supervisor:
             values = self._get_public_registration_values(
@@ -268,21 +285,8 @@ class InternshipPortalController(http.Controller):
             )
             return request.render("psi_internship_portal.portal_internship_public_register", values)
 
-        portal_group = request.env.ref("base.group_portal")
-        user = request.env["res.users"].sudo().with_context(no_reset_password=True).create(
-            {
-                "name": name,
-                "login": email,
-                "password": password,
-                "email": email,
-                "phone": phone,
-                "groups_id": [(6, 0, [portal_group.id])],
-            }
-        )
-
         vals = {
             "name": name,
-            "user_id": user.id,
             "phone": phone,
             "email": email,
             "school": school,
@@ -290,16 +294,16 @@ class InternshipPortalController(http.Controller):
             "required_hours": required_hours,
             "supervisor_id": supervisor.id,
             "notes": notes,
+            "password_plain": password,
+            "status": "new",
         }
         if start_date:
             vals["start_date"] = start_date
         if end_date:
             vals["end_date"] = end_date
 
-        request.env["psi.intern.student"].sudo().create(vals)
-        request.env.cr.commit()
-        request.session.authenticate(request.db, {"login": email, "password": password, "type": "password"})
-        return request.redirect("/my/internship?message=registered")
+        request.env["psi.intern.application"].sudo().create(vals)
+        return request.redirect("/internship/register?message=application_submitted")
 
     @http.route("/my/internship", type="http", auth="user", website=True)
     def my_internship(self, message=None, **kwargs):

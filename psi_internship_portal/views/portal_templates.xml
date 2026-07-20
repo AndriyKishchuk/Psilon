@@ -32,8 +32,8 @@
                                     <p class="lead text-muted mb-0">Utwórz konto, uzupełnij podstawowe dane i przejdź od razu do swojego panelu praktyk.</p>
                                 </div>
 
-                                <t t-if="message == 'registered'">
-                                    <div class="alert alert-success rounded-4 border-0 shadow-sm">Rejestracja zakończyła się powodzeniem. Możesz przejść do panelu praktyk.</div>
+                                <t t-if="message == 'application_submitted'">
+                                    <div class="alert alert-success rounded-4 border-0 shadow-sm">Twoje zgłoszenie zostało zapisane. Poczekaj na akceptację opiekuna praktyk.</div>
                                 </t>
                                 <t t-if="message == 'registration_missing_fields'">
                                     <div class="alert alert-warning rounded-4 border-0 shadow-sm">Uzupełnij wszystkie wymagane pola formularza.</div>
@@ -49,6 +49,9 @@
                                 </t>
                                 <t t-if="message == 'registration_email_exists'">
                                     <div class="alert alert-danger rounded-4 border-0 shadow-sm">Użytkownik z takim adresem e-mail już istnieje.</div>
+                                </t>
+                                <t t-if="message == 'registration_application_exists'">
+                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Dla tego adresu e-mail istnieje już oczekujące zgłoszenie.</div>
                                 </t>
                                 <t t-if="message == 'registration_invalid_required_hours'">
                                     <div class="alert alert-warning rounded-4 border-0 shadow-sm">Podaj poprawną wymaganą liczbę godzin większą od zera.</div>
