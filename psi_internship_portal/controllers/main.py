@@ -23,6 +23,27 @@ class InternshipPortalController(http.Controller):
             limit=1,
         )
 
+    def _get_portal_status(self, student):
+        if not student:
+            return "new", "Nowy"
+
+        if student.status == "cancelled":
+            return "cancelled", "Anulowany"
+
+        today = fields.Date.today()
+        if not student.start_date:
+            return "new", "Nowy"
+        if student.end_date:
+            if today < student.start_date:
+                return "new", "Nowy"
+            if student.start_date <= today <= student.end_date:
+                return "active", "Aktywna"
+            if today > student.end_date:
+                return "finished", "Zakonczona"
+        if today < student.start_date:
+            return "new", "Nowy"
+        return "active", "Aktywna"
+
     def _get_default_supervisor(self):
         return request.env["res.users"].sudo().search(
             [("share", "=", False), ("active", "=", True)],
@@ -39,6 +60,7 @@ class InternshipPortalController(http.Controller):
         document_count = 0
         total_hours_display = self._format_hours_label(0.0)
         next_attendance_duration_display = self._format_hours_label(0.0)
+        portal_status, portal_status_label = self._get_portal_status(student)
 
         if student:
             attendances = student.attendance_ids.sorted("start_datetime")
@@ -76,6 +98,8 @@ class InternshipPortalController(http.Controller):
         return {
             "student": student,
             "page_name": "my_internship",
+            "portal_status": portal_status,
+            "portal_status_label": portal_status_label,
             "attendance_count": attendance_count,
             "next_attendance": next_attendance,
             "current_attendance": current_attendance,
@@ -86,6 +110,49 @@ class InternshipPortalController(http.Controller):
             "next_attendance_duration_display": next_attendance_duration_display,
             "message": message,
             "form_values": form_values or {},
+        }
+
+    def _get_profile_values(self, student, message=None):
+        portal_status, portal_status_label = self._get_portal_status(student)
+        documents = (
+            student.document_ids.sorted(
+                key=lambda d: d.create_date or d.id,
+                reverse=True,
+            )
+            if student
+            else request.env["ir.attachment"]
+        )
+        return {
+            "student": student,
+            "page_name": "my_internship_profile",
+            "portal_status": portal_status,
+            "portal_status_label": portal_status_label,
+            "documents": documents,
+            "document_count": len(documents) if student else 0,
+            "total_hours_display": self._format_hours_label(
+                student.total_attendance_hours if student else 0.0
+            ),
+            "message": message,
+        }
+
+    def _get_documents_values(self, student, message=None):
+        portal_status, portal_status_label = self._get_portal_status(student)
+        documents = (
+            student.document_ids.sorted(
+                key=lambda d: d.create_date or d.id,
+                reverse=True,
+            )
+            if student
+            else request.env["ir.attachment"]
+        )
+        return {
+            "student": student,
+            "page_name": "my_internship_documents",
+            "portal_status": portal_status,
+            "portal_status_label": portal_status_label,
+            "documents": documents,
+            "document_count": len(documents) if student else 0,
+            "message": message,
         }
 
     def _get_public_registration_values(self, message=None, form_values=None):
@@ -119,6 +186,7 @@ class InternshipPortalController(http.Controller):
         phone = (post.get("phone") or "").strip()
         school = (post.get("school") or "").strip()
         field_of_study = (post.get("field_of_study") or "").strip()
+        required_hours_raw = (post.get("required_hours") or "").strip()
         start_date = (post.get("start_date") or "").strip()
         end_date = (post.get("end_date") or "").strip()
         notes = (post.get("notes") or "").strip()
@@ -129,14 +197,27 @@ class InternshipPortalController(http.Controller):
             "phone": phone,
             "school": school,
             "field_of_study": field_of_study,
+            "required_hours": required_hours_raw,
             "start_date": start_date,
             "end_date": end_date,
             "notes": notes,
         }
 
-        if not name or not email or not password or not password_confirm or not school or not field_of_study:
+        if not name or not email or not password or not password_confirm or not school or not field_of_study or not required_hours_raw:
             values = self._get_public_registration_values(
                 message="registration_missing_fields",
+                form_values=form_values,
+            )
+            return request.render("psi_internship_portal.portal_internship_public_register", values)
+
+        try:
+            required_hours = int(required_hours_raw)
+        except ValueError:
+            required_hours = 0
+
+        if required_hours <= 0:
+            values = self._get_public_registration_values(
+                message="registration_invalid_required_hours",
                 form_values=form_values,
             )
             return request.render("psi_internship_portal.portal_internship_public_register", values)
@@ -186,6 +267,7 @@ class InternshipPortalController(http.Controller):
             "email": email,
             "school": school,
             "field_of_study": field_of_study,
+            "required_hours": required_hours,
             "supervisor_id": supervisor.id,
             "notes": notes,
         }
@@ -204,6 +286,24 @@ class InternshipPortalController(http.Controller):
         student = self._get_student_for_current_user()
         values = self._get_dashboard_values(student, message=message)
         return request.render("psi_internship_portal.portal_my_internship", values)
+
+    @http.route("/my/internship/profile", type="http", auth="user", website=True)
+    def my_internship_profile(self, message=None, **kwargs):
+        student = self._get_student_for_current_user()
+        values = self._get_profile_values(student, message=message)
+        return request.render(
+            "psi_internship_portal.portal_my_internship_profile",
+            values,
+        )
+
+    @http.route("/my/internship/documents", type="http", auth="user", website=True)
+    def my_internship_documents(self, message=None, **kwargs):
+        student = self._get_student_for_current_user()
+        values = self._get_documents_values(student, message=message)
+        return request.render(
+            "psi_internship_portal.portal_my_internship_documents",
+            values,
+        )
 
     @http.route(
         "/my/internship/register",
@@ -292,6 +392,10 @@ class InternshipPortalController(http.Controller):
             "student": student,
             "attendances": attendances,
             "page_name": "my_internship_attendance",
+            "documents": student.document_ids.sorted(
+                key=lambda d: d.create_date or d.id,
+                reverse=True,
+            ) if student else request.env["ir.attachment"],
         }
         return request.render(
             "psi_internship_portal.portal_my_internship_attendance", values
