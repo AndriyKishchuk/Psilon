@@ -29,11 +29,14 @@
                                 <div class="text-center mb-5">
                                     <span class="badge rounded-pill text-bg-light px-3 py-2 mb-3">Portal praktykanta</span>
                                     <h1 class="display-5 fw-bold mb-3">Rejestracja praktykanta</h1>
-                                    <p class="lead text-muted mb-0">Utwórz konto, uzupełnij podstawowe dane i przejdź od razu do swojego panelu praktyk.</p>
+                                    <p class="lead text-muted mb-0">Wypełnij formularz zgłoszeniowy. Konto praktykanta zostanie utworzone dopiero po akceptacji opiekuna.</p>
                                 </div>
 
                                 <t t-if="message == 'application_submitted'">
                                     <div class="alert alert-success rounded-4 border-0 shadow-sm">Twoje zgłoszenie zostało zapisane. Poczekaj na akceptację opiekuna praktyk.</div>
+                                </t>
+                                <t t-if="message == 'application_exists'">
+                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">To zgłoszenie już istnieje. Poniżej możesz sprawdzić jego aktualny status.</div>
                                 </t>
                                 <t t-if="message == 'registration_missing_fields'">
                                     <div class="alert alert-warning rounded-4 border-0 shadow-sm">Uzupełnij wszystkie wymagane pola formularza.</div>
@@ -48,7 +51,7 @@
                                     <div class="alert alert-warning rounded-4 border-0 shadow-sm">Data zakończenia nie może być wcześniejsza niż data rozpoczęcia.</div>
                                 </t>
                                 <t t-if="message == 'registration_email_exists'">
-                                    <div class="alert alert-danger rounded-4 border-0 shadow-sm">Użytkownik z takim adresem e-mail już istnieje.</div>
+                                    <div class="alert alert-danger rounded-4 border-0 shadow-sm">Konto z takim adresem e-mail już istnieje. Zaloguj się albo użyj innego adresu.</div>
                                 </t>
                                 <t t-if="message == 'registration_application_exists'">
                                     <div class="alert alert-warning rounded-4 border-0 shadow-sm">Dla tego adresu e-mail istnieje już oczekujące zgłoszenie.</div>
@@ -111,7 +114,7 @@
                                                 </div>
                                                 <div class="col-12 d-grid d-md-flex justify-content-md-end gap-3">
                                                     <a href="/web/login" class="btn btn-outline-secondary btn-lg rounded-pill px-4">Mam już konto</a>
-                                                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5">Zarejestruj się</button>
+                                                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5">Wyślij zgłoszenie</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -125,11 +128,92 @@
         </t>
     </template>
 
+    <template id="portal_internship_public_status" name="Status zgłoszenia praktykanta">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="py-5" style="background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 45%, #ffffff 100%); min-height: 80vh;">
+                    <div class="container py-4 py-lg-5">
+                        <div class="row justify-content-center">
+                            <div class="col-xl-8 col-lg-10">
+                                <div class="text-center mb-5">
+                                    <span class="badge rounded-pill text-bg-light px-3 py-2 mb-3">Status zgłoszenia</span>
+                                    <h1 class="display-5 fw-bold mb-3">Twoja praktyka</h1>
+                                    <p class="lead text-muted mb-0">Tutaj sprawdzisz aktualny status zgłoszenia do praktyk.</p>
+                                </div>
+
+                                <t t-if="portal_status == 'pending'">
+                                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
+                                        <div class="card-body p-4 p-lg-5">
+                                            <span class="badge rounded-pill text-bg-warning px-3 py-2 mb-3">Oczekuje na akceptację</span>
+                                            <h2 class="fw-bold mb-3">Zgłoszenie zostało zapisane</h2>
+                                            <p class="text-muted mb-4">Opiekun praktyk musi teraz sprawdzić Twoje dane. Do tego momentu konto nie jest jeszcze aktywne. Po akceptacji w tym miejscu pojawi się możliwość logowania.</p>
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="rounded-4 p-3 h-100" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                                        <div class="text-muted small">Imię i nazwisko</div>
+                                                        <div class="fw-semibold"><t t-esc="application.name"/></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="rounded-4 p-3 h-100" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                                        <div class="text-muted small">Adres e-mail</div>
+                                                        <div class="fw-semibold"><t t-esc="application.email"/></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="rounded-4 p-3 h-100" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                                        <div class="text-muted small">Szkoła / Uczelnia</div>
+                                                        <div class="fw-semibold"><t t-esc="application.school"/></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="rounded-4 p-3 h-100" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                                        <div class="text-muted small">Kierunek / Profil</div>
+                                                        <div class="fw-semibold"><t t-esc="application.field_of_study"/></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="portal_status == 'approved'">
+                                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
+                                        <div class="card-body p-4 p-lg-5 text-center">
+                                            <span class="badge rounded-pill text-bg-success px-3 py-2 mb-3">Zaakceptowano</span>
+                                            <h2 class="fw-bold mb-3">Twoje zgłoszenie zostało zaakceptowane</h2>
+                                            <p class="text-muted mb-4">Opiekun zatwierdził Twoje zgłoszenie. Konto zostało przygotowane i możesz teraz zalogować się adresem e-mail podanym w formularzu oraz hasłem ustawionym podczas rejestracji.</p>
+                                            <a href="/web/login" class="btn btn-primary btn-lg rounded-pill px-5">Przejdź do logowania</a>
+                                        </div>
+                                    </div>
+                                </t>
+
+                                <t t-if="portal_status == 'rejected'">
+                                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
+                                        <div class="card-body p-4 p-lg-5 text-center">
+                                            <span class="badge rounded-pill text-bg-danger px-3 py-2 mb-3">Odrzucono</span>
+                                            <h2 class="fw-bold mb-3">Ups, Twoje zgłoszenie zostało odrzucone</h2>
+                                            <p class="text-muted mb-4">Skontaktuj się z opiekunem praktyk albo wypełnij nowy formularz, jeśli chcesz spróbować ponownie.</p>
+                                            <a href="/internship/register" class="btn btn-outline-secondary btn-lg rounded-pill px-5">Wróć do formularza</a>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
     <template id="portal_my_internship" name="Moja praktyka">
         <t t-call="portal.portal_layout">
             <div class="container py-4">
                 <t t-if="message == 'registered'">
                     <div class="alert alert-success rounded-4 border-0 shadow-sm">Rejestracja praktykanta została zapisana poprawnie.</div>
+                </t>
+                <t t-if="message == 'application_submitted'">
+                    <div class="alert alert-success rounded-4 border-0 shadow-sm">Twoje zgłoszenie zostało zapisane i czeka na akceptację opiekuna praktyk.</div>
                 </t>
                 <t t-if="message == 'registration_missing_fields'">
                     <div class="alert alert-warning rounded-4 border-0 shadow-sm">Uzupełnij imię i nazwisko, szkołę oraz kierunek.</div>
@@ -385,6 +469,74 @@
                         </div>
                     </div>
 
+                </t>
+                <t t-elif="application">
+                    <div class="rounded-4 p-3 p-lg-4 mb-4 text-white" style="background: linear-gradient(135deg, #4338ca 0%, #7c3aed 55%, #0f172a 100%);">
+                        <div class="row align-items-center g-3">
+                            <div class="col-lg-8">
+                                <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                                    <span class="badge rounded-pill bg-white text-dark px-3 py-2">
+                                        <t t-esc="portal_status_label"/>
+                                    </span>
+                                </div>
+                                <h1 class="fw-bold mb-2" style="font-size: 2.2rem;">Twoje zgłoszenie oczekuje na akceptację</h1>
+                                <p class="mb-0 opacity-75">Konto zostało utworzone, ale pełny profil praktyk zostanie odblokowany dopiero po zatwierdzeniu przez opiekuna.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div class="card-body p-4 p-lg-5">
+                            <div class="row g-4">
+                                <div class="col-lg-6">
+                                    <div class="text-uppercase text-muted small fw-semibold mb-3">Dane podstawowe</div>
+                                    <div class="mb-3">
+                                        <div class="text-muted small">Imię i nazwisko</div>
+                                        <div class="fw-semibold fs-5"><t t-esc="application.name"/></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="text-muted small">Adres e-mail</div>
+                                        <div class="fw-semibold"><t t-esc="application.email"/></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="text-muted small">Telefon</div>
+                                        <div class="fw-semibold"><t t-esc="application.phone or '-'"/></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="text-muted small">Szkoła / Uczelnia</div>
+                                        <div class="fw-semibold"><t t-esc="application.school"/></div>
+                                    </div>
+                                    <div class="mb-0">
+                                        <div class="text-muted small">Kierunek / Profil</div>
+                                        <div class="fw-semibold"><t t-esc="application.field_of_study"/></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="text-uppercase text-muted small fw-semibold mb-3">Parametry praktyki</div>
+                                    <div class="mb-3">
+                                        <div class="text-muted small">Wymagana liczba godzin</div>
+                                        <div class="fw-semibold fs-5"><t t-esc="application.required_hours"/></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="text-muted small">Data rozpoczęcia</div>
+                                        <div class="fw-semibold"><t t-esc="application.start_date or '-'"/></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="text-muted small">Data zakończenia</div>
+                                        <div class="fw-semibold"><t t-esc="application.end_date or '-'"/></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="text-muted small">Opiekun</div>
+                                        <div class="fw-semibold"><t t-esc="application.supervisor_id.name or 'Nie przypisano'"/></div>
+                                    </div>
+                                    <div class="mb-0">
+                                        <div class="text-muted small">Notatka</div>
+                                        <div class="fw-semibold"><t t-esc="application.notes or '-'"/></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </t>
                 <t t-else="">
                     <div class="row justify-content-center">

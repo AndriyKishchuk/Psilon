@@ -1,5 +1,6 @@
 import base64
 import re
+import uuid
 
 from odoo import fields, http
 from odoo.http import request
@@ -29,8 +30,30 @@ class InternshipPortalController(http.Controller):
             limit=1,
         )
 
-    def _get_portal_status(self, student):
+    def _get_application_for_current_user(self):
+        return request.env["psi.intern.application"].sudo().search(
+            [("user_id", "=", request.env.user.id)],
+            limit=1,
+            order="create_date desc",
+        )
+
+    def _get_application_by_token(self, token):
+        return request.env["psi.intern.application"].sudo().search(
+            [("registration_token", "=", token)],
+            limit=1,
+        )
+
+    def _is_pending_application_user(self, student=None, application=None):
+        student = student or self._get_student_for_current_user()
+        application = application or self._get_application_for_current_user()
+        return bool(application and application.status == "new" and not student)
+
+    def _get_portal_status(self, student, application=None):
         if not student:
+            if application and application.status == "new":
+                return "pending", "Oczekuje na akceptacje"
+            if application and application.status == "rejected":
+                return "rejected", "Odrzucone"
             return "new", "Nowy"
 
         if student.status == "cancelled":
@@ -57,7 +80,7 @@ class InternshipPortalController(http.Controller):
             order="id asc",
         )
 
-    def _get_dashboard_values(self, student, message=None, form_values=None):
+    def _get_dashboard_values(self, student, application=None, message=None, form_values=None):
         attendances = request.env["psi.intern.attendance"]
         attendance_count = 0
         next_attendance = request.env["psi.intern.attendance"]
@@ -66,7 +89,7 @@ class InternshipPortalController(http.Controller):
         document_count = 0
         total_hours_display = self._format_hours_label(0.0)
         next_attendance_duration_display = self._format_hours_label(0.0)
-        portal_status, portal_status_label = self._get_portal_status(student)
+        portal_status, portal_status_label = self._get_portal_status(student, application)
 
         if student:
             attendances = student.attendance_ids.sorted("start_datetime")
@@ -103,6 +126,7 @@ class InternshipPortalController(http.Controller):
 
         return {
             "student": student,
+            "application": application,
             "page_name": "my_internship",
             "portal_status": portal_status,
             "portal_status_label": portal_status_label,
@@ -118,8 +142,8 @@ class InternshipPortalController(http.Controller):
             "form_values": form_values or {},
         }
 
-    def _get_profile_values(self, student, message=None):
-        portal_status, portal_status_label = self._get_portal_status(student)
+    def _get_profile_values(self, student, application=None, message=None):
+        portal_status, portal_status_label = self._get_portal_status(student, application)
         documents = (
             student.document_ids.sorted(
                 key=lambda d: d.create_date or d.id,
@@ -130,6 +154,7 @@ class InternshipPortalController(http.Controller):
         )
         return {
             "student": student,
+            "application": application,
             "page_name": "my_internship_profile",
             "portal_status": portal_status,
             "portal_status_label": portal_status_label,
@@ -141,8 +166,8 @@ class InternshipPortalController(http.Controller):
             "message": message,
         }
 
-    def _get_documents_values(self, student, message=None):
-        portal_status, portal_status_label = self._get_portal_status(student)
+    def _get_documents_values(self, student, application=None, message=None):
+        portal_status, portal_status_label = self._get_portal_status(student, application)
         documents = (
             student.document_ids.sorted(
                 key=lambda d: d.create_date or d.id,
@@ -153,6 +178,7 @@ class InternshipPortalController(http.Controller):
         )
         return {
             "student": student,
+            "application": application,
             "page_name": "my_internship_documents",
             "portal_status": portal_status,
             "portal_status_label": portal_status_label,
@@ -168,14 +194,44 @@ class InternshipPortalController(http.Controller):
             "form_values": form_values or {},
         }
 
+    def _get_public_status_values(self, application, message=None):
+        portal_status, portal_status_label = self._get_portal_status(
+            request.env["psi.intern.student"],
+            application=application,
+        )
+        return {
+            "page_name": "internship_public_status",
+            "application": application,
+            "portal_status": portal_status,
+            "portal_status_label": portal_status_label,
+            "message": message,
+        }
+
     @http.route("/internship/register", type="http", auth="public", website=True)
     def internship_public_register(self, message=None, **kwargs):
         if request.env.user and request.env.user.id and not request.env.user._is_public():
             student = self._get_student_for_current_user()
-            if student:
+            application = self._get_application_for_current_user()
+            if student or application:
                 return request.redirect("/my/internship")
         values = self._get_public_registration_values(message=message)
         return request.render("psi_internship_portal.portal_internship_public_register", values)
+
+    @http.route("/internship/status/<string:token>", type="http", auth="public", website=True)
+    def internship_public_status(self, token, message=None, **kwargs):
+        application = self._get_application_by_token(token)
+        if not application:
+            return request.not_found()
+        values = self._get_public_status_values(application, message=message)
+        return request.render("psi_internship_portal.portal_internship_public_status", values)
+
+    @http.route("/my/home", type="http", auth="user", website=True)
+    def my_portal_home_redirect(self, **kwargs):
+        student = self._get_student_for_current_user()
+        application = self._get_application_for_current_user()
+        if self._is_pending_application_user(student=student, application=application):
+            return request.redirect("/my/internship")
+        return request.redirect("/my")
 
     @http.route(
         "/internship/register/submit",
@@ -249,27 +305,19 @@ class InternshipPortalController(http.Controller):
             )
             return request.render("psi_internship_portal.portal_internship_public_register", values)
 
-        existing_user = request.env["res.users"].sudo().search(
-            [("login", "=", email)],
-            limit=1,
-        )
-        if existing_user:
-            values = self._get_public_registration_values(
-                message="registration_email_exists",
-                form_values=form_values,
-            )
-            return request.render("psi_internship_portal.portal_internship_public_register", values)
-
         existing_application = request.env["psi.intern.application"].sudo().search(
-            [
-                ("email", "=", email),
-                ("status", "=", "new"),
-            ],
+            [("email", "=", email)],
             limit=1,
+            order="create_date desc",
         )
         if existing_application:
+            message = "application_exists"
+            if existing_application.status == "rejected":
+                message = "registration_email_blocked"
+            elif existing_application.status == "approved":
+                message = "registration_email_exists"
             values = self._get_public_registration_values(
-                message="registration_application_exists",
+                message=message,
                 form_values=form_values,
             )
             return request.render(
@@ -285,6 +333,20 @@ class InternshipPortalController(http.Controller):
             )
             return request.render("psi_internship_portal.portal_internship_public_register", values)
 
+        existing_user = request.env["res.users"].sudo().search(
+            [("login", "=", email)],
+            limit=1,
+        )
+        if existing_user:
+            values = self._get_public_registration_values(
+                message="registration_email_exists",
+                form_values=form_values,
+            )
+            return request.render(
+                "psi_internship_portal.portal_internship_public_register",
+                values,
+            )
+
         vals = {
             "name": name,
             "phone": phone,
@@ -295,6 +357,7 @@ class InternshipPortalController(http.Controller):
             "supervisor_id": supervisor.id,
             "notes": notes,
             "password_plain": password,
+            "registration_token": str(uuid.uuid4()),
             "status": "new",
         }
         if start_date:
@@ -302,19 +365,28 @@ class InternshipPortalController(http.Controller):
         if end_date:
             vals["end_date"] = end_date
 
-        request.env["psi.intern.application"].sudo().create(vals)
-        return request.redirect("/internship/register?message=application_submitted")
+        application = request.env["psi.intern.application"].sudo().create(vals)
+        return request.redirect(
+            "/internship/status/%s?message=application_submitted"
+            % application.registration_token
+        )
 
     @http.route("/my/internship", type="http", auth="user", website=True)
     def my_internship(self, message=None, **kwargs):
         student = self._get_student_for_current_user()
-        values = self._get_dashboard_values(student, message=message)
+        application = self._get_application_for_current_user()
+        values = self._get_dashboard_values(student, application=application, message=message)
         return request.render("psi_internship_portal.portal_my_internship", values)
 
     @http.route("/my/internship/profile", type="http", auth="user", website=True)
     def my_internship_profile(self, message=None, **kwargs):
         student = self._get_student_for_current_user()
-        values = self._get_profile_values(student, message=message)
+        application = self._get_application_for_current_user()
+        if self._is_pending_application_user(student=student, application=application):
+            return request.redirect("/my/internship")
+        if not student and application:
+            return request.redirect("/my/internship")
+        values = self._get_profile_values(student, application=application, message=message)
         return request.render(
             "psi_internship_portal.portal_my_internship_profile",
             values,
@@ -323,7 +395,12 @@ class InternshipPortalController(http.Controller):
     @http.route("/my/internship/documents", type="http", auth="user", website=True)
     def my_internship_documents(self, message=None, **kwargs):
         student = self._get_student_for_current_user()
-        values = self._get_documents_values(student, message=message)
+        application = self._get_application_for_current_user()
+        if self._is_pending_application_user(student=student, application=application):
+            return request.redirect("/my/internship")
+        if not student and application:
+            return request.redirect("/my/internship")
+        values = self._get_documents_values(student, application=application, message=message)
         return request.render(
             "psi_internship_portal.portal_my_internship_documents",
             values,
@@ -340,11 +417,15 @@ class InternshipPortalController(http.Controller):
         student = self._get_student_for_current_user()
         if student:
             return request.redirect("/my/internship")
+        application = self._get_application_for_current_user()
+        if application:
+            return request.redirect("/my/internship")
 
         name = (post.get("name") or request.env.user.name or "").strip()
         phone = (post.get("phone") or "").strip()
         school = (post.get("school") or "").strip()
         field_of_study = (post.get("field_of_study") or "").strip()
+        required_hours_raw = (post.get("required_hours") or "").strip()
         start_date = (post.get("start_date") or "").strip()
         end_date = (post.get("end_date") or "").strip()
         notes = (post.get("notes") or "").strip()
@@ -355,15 +436,49 @@ class InternshipPortalController(http.Controller):
             "phone": phone,
             "school": school,
             "field_of_study": field_of_study,
+            "required_hours": required_hours_raw,
             "start_date": start_date,
             "end_date": end_date,
             "notes": notes,
         }
 
-        if not name or not school or not field_of_study:
+        if not name or not school or not field_of_study or not required_hours_raw:
             values = self._get_dashboard_values(
                 request.env["psi.intern.student"],
+                application=request.env["psi.intern.application"],
                 message="registration_missing_fields",
+                form_values=form_values,
+            )
+            return request.render("psi_internship_portal.portal_my_internship", values)
+
+        try:
+            required_hours = int(required_hours_raw)
+        except ValueError:
+            required_hours = 0
+
+        if phone and not self._is_valid_phone(phone):
+            values = self._get_dashboard_values(
+                request.env["psi.intern.student"],
+                application=request.env["psi.intern.application"],
+                message="registration_invalid_phone",
+                form_values=form_values,
+            )
+            return request.render("psi_internship_portal.portal_my_internship", values)
+
+        if start_date and end_date and end_date < start_date:
+            values = self._get_dashboard_values(
+                request.env["psi.intern.student"],
+                application=request.env["psi.intern.application"],
+                message="registration_invalid_dates",
+                form_values=form_values,
+            )
+            return request.render("psi_internship_portal.portal_my_internship", values)
+
+        if required_hours <= 0:
+            values = self._get_dashboard_values(
+                request.env["psi.intern.student"],
+                application=request.env["psi.intern.application"],
+                message="registration_invalid_required_hours",
                 form_values=form_values,
             )
             return request.render("psi_internship_portal.portal_my_internship", values)
@@ -372,6 +487,7 @@ class InternshipPortalController(http.Controller):
         if not supervisor:
             values = self._get_dashboard_values(
                 request.env["psi.intern.student"],
+                application=request.env["psi.intern.application"],
                 message="registration_no_supervisor",
                 form_values=form_values,
             )
@@ -384,15 +500,17 @@ class InternshipPortalController(http.Controller):
             "email": email,
             "school": school,
             "field_of_study": field_of_study,
+            "required_hours": required_hours,
             "supervisor_id": supervisor.id,
             "notes": notes,
+            "status": "new",
         }
         if start_date:
             vals["start_date"] = start_date
         if end_date:
             vals["end_date"] = end_date
 
-        request.env["psi.intern.student"].sudo().create(vals)
+        request.env["psi.intern.application"].sudo().create(vals)
         request.env.user.sudo().write({"name": name})
         request.env.user.partner_id.sudo().write(
             {
@@ -401,11 +519,16 @@ class InternshipPortalController(http.Controller):
                 "email": email,
             }
         )
-        return request.redirect("/my/internship?message=registered")
+        return request.redirect("/my/internship?message=application_submitted")
 
     @http.route("/my/internship/attendance", type="http", auth="user", website=True)
     def my_internship_attendance(self, **kwargs):
         student = self._get_student_for_current_user()
+        application = self._get_application_for_current_user()
+        if self._is_pending_application_user(student=student, application=application):
+            return request.redirect("/my/internship")
+        if not student and application:
+            return request.redirect("/my/internship")
         attendances = (
             student.attendance_ids.sorted("start_datetime")
             if student
