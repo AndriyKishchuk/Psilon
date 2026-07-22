@@ -4,6 +4,7 @@ from odoo.exceptions import ValidationError
 
 class InternApplication(models.Model):
     _name = "psi.intern.application"
+    _inherit = ["mail.thread", "mail.activity.mixin"]
     _description = "Internship Application"
     _order = "create_date desc"
 
@@ -30,6 +31,56 @@ class InternApplication(models.Model):
         default="new",
         required=True,
     )
+
+    def _create_supervisor_activity(self, summary, note):
+        activity_type = self.env.ref(
+            "mail.mail_activity_data_todo",
+            raise_if_not_found=False,
+        )
+        if not activity_type:
+            return
+
+        model_id = self.env["ir.model"]._get_id(self._name)
+        for record in self:
+            if not record.supervisor_id:
+                continue
+
+            existing_activity = self.env["mail.activity"].sudo().search(
+                [
+                    ("res_model_id", "=", model_id),
+                    ("res_id", "=", record.id),
+                    ("user_id", "=", record.supervisor_id.id),
+                    ("summary", "=", summary),
+                ],
+                limit=1,
+            )
+            if existing_activity:
+                continue
+
+            self.env["mail.activity"].sudo().create(
+                {
+                    "activity_type_id": activity_type.id,
+                    "summary": summary,
+                    "note": note,
+                    "user_id": record.supervisor_id.id,
+                    "res_id": record.id,
+                    "res_model_id": model_id,
+                }
+            )
+
+    def _notify_supervisor_inbox(self, subject, body):
+        for record in self:
+            partner = record.supervisor_id.partner_id
+            if not partner:
+                continue
+
+            record.message_post(
+                body=body,
+                subject=subject,
+                partner_ids=[partner.id],
+                message_type="notification",
+                subtype_xmlid="mail.mt_comment",
+            )
 
     @api.constrains("email")
     def _check_email(self):
@@ -60,6 +111,22 @@ class InternApplication(models.Model):
                 raise ValidationError(
                     "Data zakonczenia nie moze byc wczesniejsza niz data rozpoczecia."
                 )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for record in records:
+            record._create_supervisor_activity(
+                "Nowe zgloszenie praktykanta",
+                "Praktykant %s wyslal nowe zgloszenie. Sprawdz dane i zdecyduj, czy je zaakceptowac."
+                % (record.name,),
+            )
+            record._notify_supervisor_inbox(
+                "Nowe zgloszenie praktykanta",
+                "Praktykant <b>%s</b> wyslal nowe zgloszenie. Przejdz do zgloszenia i sprawdz jego dane."
+                % (record.name,),
+            )
+        return records
 
     def action_approve(self):
         for record in self:
@@ -109,4 +176,17 @@ class InternApplication(models.Model):
                     "status": "rejected",
                     "user_id": False,
                 }
+            )
+
+    def action_notify_account_created(self):
+        for record in self:
+            record._create_supervisor_activity(
+                "Praktykant utworzyl konto",
+                "Praktykant %s utworzyl konto portalowe i moze juz korzystac ze swojej strefy praktyk."
+                % (record.name,),
+            )
+            record._notify_supervisor_inbox(
+                "Praktykant utworzyl konto",
+                "Praktykant <b>%s</b> utworzyl konto portalowe i moze juz korzystac ze swojej strefy praktyk."
+                % (record.name,),
             )

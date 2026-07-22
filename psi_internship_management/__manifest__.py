@@ -3,7 +3,7 @@
     "version": "18.0.1.0.0",
     "summary": "Moduł do zarządzania praktykami",
     "category": "Zasoby ludzkie",
-    "depends": ["base"],
+    "depends": ["base", "mail"],
     "data": [
         "security/ir.model.access.csv",
         "views/intern_application_views.xml",
