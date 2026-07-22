@@ -182,6 +182,18 @@ class InternStudent(models.Model):
                 else:
                     record.status = "active"
 
+    def action_cancel_practice(self):
+        for record in self:
+            if record.status == "cancelled":
+                continue
+            record.status = "cancelled"
+
+    def action_restore_practice(self):
+        for record in self:
+            if record.status != "cancelled":
+                continue
+            record._set_status_from_dates()
+
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)

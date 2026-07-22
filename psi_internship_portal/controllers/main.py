@@ -82,6 +82,10 @@ class InternshipPortalController(http.Controller):
             order="id asc",
         )
 
+    @staticmethod
+    def _is_cancelled_student(student):
+        return bool(student and student.status == "cancelled")
+
     def _get_dashboard_values(self, student, application=None, message=None, form_values=None):
         attendances = request.env["psi.intern.attendance"]
         attendance_count = 0
@@ -417,6 +421,7 @@ class InternshipPortalController(http.Controller):
             if application.student_id:
                 application.student_id.sudo().write({"user_id": existing_user.id})
             application.sudo().write({"user_id": existing_user.id})
+            application.sudo().action_notify_account_created()
             return request.redirect("/web/login?login=%s" % application.email)
 
         portal_group = request.env.ref("base.group_portal")
@@ -444,6 +449,7 @@ class InternshipPortalController(http.Controller):
             application.student_id.sudo().write({"user_id": user.id})
 
         application.sudo().write({"user_id": user.id})
+        application.sudo().action_notify_account_created()
         return request.redirect("/web/login?login=%s" % application.email)
 
     @http.route("/my/internship", type="http", auth="user", website=True)
@@ -634,6 +640,8 @@ class InternshipPortalController(http.Controller):
         student = self._get_student_for_current_user()
         if not student:
             return request.redirect("/my/internship?message=no_student")
+        if self._is_cancelled_student(student):
+            return request.redirect("/my/internship?message=student_cancelled")
 
         current_attendance = request.env["psi.intern.attendance"].sudo().search(
             [
@@ -668,6 +676,8 @@ class InternshipPortalController(http.Controller):
         student = self._get_student_for_current_user()
         if not student:
             return request.redirect("/my/internship?message=no_student")
+        if self._is_cancelled_student(student):
+            return request.redirect("/my/internship?message=student_cancelled")
 
         current_attendance = request.env["psi.intern.attendance"].sudo().search(
             [
@@ -700,6 +710,8 @@ class InternshipPortalController(http.Controller):
         student = self._get_student_for_current_user()
         if not student:
             return request.redirect("/my/internship?message=no_student")
+        if self._is_cancelled_student(student):
+            return request.redirect("/my/internship?message=student_cancelled")
 
         file_storage = request.httprequest.files.get("document")
         if not file_storage or not file_storage.filename:

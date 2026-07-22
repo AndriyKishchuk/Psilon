@@ -41,7 +41,7 @@
                 </group>
 
                 <searchpanel>
-                    
+                    <field name="status" string="Status"/>
                     <field name="supervisor_id" string="Opiekun" hierarchize="0"/>
                 </searchpanel>
             </search>
@@ -77,6 +77,20 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <button
+                        name="action_cancel_practice"
+                        type="object"
+                        string="Anuluj praktyke"
+                        class="btn btn-danger"
+                        invisible="status == 'cancelled'"
+                    />
+                    <button
+                        name="action_restore_practice"
+                        type="object"
+                        string="Przywroc praktyke"
+                        class="btn btn-secondary"
+                        invisible="status != 'cancelled'"
+                    />
                     <field
                         name="status"
                         widget="statusbar"
@@ -134,7 +148,7 @@
                                 <field name="total_attendance_hours" readonly="1"/>
                             </group>
 
-                            <field name="attendance_ids">
+                            <field name="attendance_ids" readonly="status == 'cancelled'">
                                 <list editable="bottom">
                                     <field name="start_datetime" string="Data i godzina rozpoczecia"/>
                                     <field name="end_datetime" string="Data i godzina zakonczenia"/>

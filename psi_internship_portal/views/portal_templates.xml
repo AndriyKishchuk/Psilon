@@ -282,6 +282,9 @@
                 <t t-if="message == 'no_student'">
                     <div class="alert alert-danger rounded-4 border-0 shadow-sm">Nie znaleziono praktykanta przypisanego do tego użytkownika.</div>
                 </t>
+                <t t-if="message == 'student_cancelled'">
+                    <div class="alert alert-danger rounded-4 border-0 shadow-sm">Ta praktyka została anulowana. Nie możesz już dodawać obecności ani przesyłać dokumentów. Skontaktuj się z opiekunem praktyk.</div>
+                </t>
                 <t t-if="message == 'upload_success'">
                     <div class="alert alert-success rounded-4 border-0 shadow-sm">Plik został dodany poprawnie.</div>
                 </t>
@@ -466,24 +469,32 @@
                                 </div>
                             </div>
 
-                            <div class="row g-3 mb-4">
-                                <div class="col-md-6">
-                                    <form action="/my/internship/check_in" method="post" class="h-100">
-                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                        <button type="submit" class="btn btn-success w-100 rounded-4 py-3 fw-semibold" t-att-disabled="current_attendance and 'disabled' or None">
-                                            Check in
-                                        </button>
-                                    </form>
+                            <t t-if="student.status != 'cancelled'">
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <form action="/my/internship/check_in" method="post" class="h-100">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <button type="submit" class="btn btn-success w-100 rounded-4 py-3 fw-semibold" t-att-disabled="current_attendance and 'disabled' or None">
+                                                Check in
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <form action="/my/internship/check_out" method="post" class="h-100">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <button type="submit" class="btn btn-dark w-100 rounded-4 py-3 fw-semibold" t-att-disabled="not current_attendance and 'disabled' or None">
+                                                Check out
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <form action="/my/internship/check_out" method="post" class="h-100">
-                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                        <button type="submit" class="btn btn-dark w-100 rounded-4 py-3 fw-semibold" t-att-disabled="not current_attendance and 'disabled' or None">
-                                            Check out
-                                        </button>
-                                    </form>
+                            </t>
+                            <t t-else="">
+                                <div class="rounded-4 p-4 mb-4" style="background: #fff1f2; border: 1px solid #fecdd3;">
+                                    <div class="fw-semibold mb-1">Praktyka została anulowana</div>
+                                    <div class="text-muted small">Check in i check out są wyłączone dla anulowanej praktyki. Jeśli to pomyłka, skontaktuj się z opiekunem.</div>
                                 </div>
-                            </div>
+                            </t>
 
                             <div class="row g-3">
                                 <div class="col-md-6">
@@ -950,18 +961,26 @@
                                 </span>
                             </div>
 
-                            <form action="/my/internship/upload_document" method="post" enctype="multipart/form-data" class="mb-4">
-                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                <div class="row g-3 align-items-end">
-                                    <div class="col-lg-9">
-                                        <label class="form-label fw-semibold">Dodaj plik</label>
-                                        <input type="file" name="document" class="form-control rounded-4"/>
+                            <t t-if="student.status != 'cancelled'">
+                                <form action="/my/internship/upload_document" method="post" enctype="multipart/form-data" class="mb-4">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-lg-9">
+                                            <label class="form-label fw-semibold">Dodaj plik</label>
+                                            <input type="file" name="document" class="form-control rounded-4"/>
+                                        </div>
+                                        <div class="col-lg-3 d-grid">
+                                            <button type="submit" class="btn btn-primary rounded-4 py-2 fw-semibold">Prześlij plik</button>
+                                        </div>
                                     </div>
-                                    <div class="col-lg-3 d-grid">
-                                        <button type="submit" class="btn btn-primary rounded-4 py-2 fw-semibold">Prześlij plik</button>
-                                    </div>
+                                </form>
+                            </t>
+                            <t t-else="">
+                                <div class="rounded-4 p-4 mb-4" style="background: #fff1f2; border: 1px solid #fecdd3;">
+                                    <div class="fw-semibold mb-1">Dodawanie plików jest wyłączone</div>
+                                    <div class="text-muted small">Dla anulowanej praktyki nie można już przesyłać nowych dokumentów.</div>
                                 </div>
-                            </form>
+                            </t>
 
                             <t t-if="documents">
                                 <div class="list-group list-group-flush">
