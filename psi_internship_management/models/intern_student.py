@@ -8,24 +8,30 @@ class InternStudent(models.Model):
     _name = "psi.intern.student"
     _description = "Intern Student"
     _order = "name"
+    _inherit = ["mail.thread", "mail.activity.mixin"]
 
-    name = fields.Char(string="Imie i nazwisko", required=True)
+    name = fields.Char(string="Imie i nazwisko", required=True, tracking=True)
     phone = fields.Char(string="Telefon")
-    email = fields.Char(string="Email")
+    email = fields.Char(string="Email", tracking=True)
     image_1920 = fields.Image(string="Zdjecie")
     user_id = fields.Many2one("res.users", string="Uzytkownik systemu")
 
-    start_date = fields.Date(string="Data rozpoczecia")
-    end_date = fields.Date(string="Data zakonczenia")
-    supervisor_id = fields.Many2one("res.users", string="Opiekun", required=True)
-    school = fields.Char(string="Szkola/Uczelnia", required=True)
-    field_of_study = fields.Char(string="Kierunek/Profil", required=True)
-    required_hours = fields.Integer(string="Wymagana liczba godzin")
+    start_date = fields.Date(string="Data rozpoczecia", tracking=True)
+    end_date = fields.Date(string="Data zakonczenia", tracking=True)
+    supervisor_id = fields.Many2one("res.users", string="Opiekun", required=True, tracking=True)
+    school = fields.Char(string="Szkola/Uczelnia", required=True, tracking=True)
+    field_of_study = fields.Char(string="Kierunek/Profil", required=True, tracking=True)
+    required_hours = fields.Integer(
+        string="Wymagana liczba godzin",
+        required=True,
+        tracking=True,
+    )
     total_attendance_hours = fields.Float(
         string="Suma godzin",
         compute="_compute_total_attendance_hours",
         store=True,
     )
+    is_cancelled = fields.Boolean(string="Praktyka anulowana", default=False, tracking=True)
     status = fields.Selection(
         [
             ("new", "Nowy"),
@@ -34,8 +40,10 @@ class InternStudent(models.Model):
             ("cancelled", "Anulowany"),
         ],
         string="Status",
-        default="new",
-        required=True,
+        compute="_compute_status",
+        store=True,
+        readonly=True,
+        tracking=True,
     )
     attendance_ids = fields.One2many(
         "psi.intern.attendance",
@@ -69,7 +77,7 @@ class InternStudent(models.Model):
     )
 
     active = fields.Boolean(string="Aktywny", default=True)
-    notes = fields.Text(string="Notatki")
+    notes = fields.Text(string="Notatki", tracking=True)
 
     @api.constrains("start_date", "end_date")
     def _check_dates(self):
@@ -136,75 +144,49 @@ class InternStudent(models.Model):
             if record.zip_code and not re.match(pattern, record.zip_code):
                 raise ValidationError("Kod pocztowy musi miec format, np. 35-505.")
 
+    @api.constrains("required_hours")
+    def _check_required_hours(self):
+        for record in self:
+            if record.required_hours <= 0:
+                raise ValidationError("Wymagana liczba godzin musi byc wieksza od 0.")
+
     @api.depends("attendance_ids.duration_hours")
     def _compute_total_attendance_hours(self):
         for record in self:
             record.total_attendance_hours = sum(record.attendance_ids.mapped("duration_hours"))
 
-    @api.onchange("start_date", "end_date")
-    def _onchange_status_from_dates(self):
+    def _get_status_from_progress(self):
+        self.ensure_one()
         today = fields.Date.today()
-        for record in self:
-            if record.status == "cancelled":
-                continue
-            if not record.start_date:
-                record.status = "new"
-            elif record.start_date and record.end_date:
-                if today < record.start_date:
-                    record.status = "new"
-                elif record.start_date <= today <= record.end_date:
-                    record.status = "active"
-                elif today > record.end_date:
-                    record.status = "finished"
-            elif record.start_date and not record.end_date:
-                if today < record.start_date:
-                    record.status = "new"
-                else:
-                    record.status = "active"
 
-    def _set_status_from_dates(self):
-        today = fields.Date.today()
+        if self.is_cancelled:
+            return "cancelled"
+        if not self.start_date:
+            return "new"
+        if self.required_hours and self.total_attendance_hours >= self.required_hours:
+            return "finished"
+        if self.end_date and today > self.end_date:
+            return "finished"
+        if today < self.start_date:
+            return "new"
+        return "active"
+
+    @api.depends("start_date", "end_date", "required_hours", "total_attendance_hours", "is_cancelled")
+    def _compute_status(self):
         for record in self:
-            if record.status == "cancelled":
-                continue
-            if not record.start_date:
-                record.status = "new"
-            elif record.start_date and record.end_date:
-                if today < record.start_date:
-                    record.status = "new"
-                elif record.start_date <= today <= record.end_date:
-                    record.status = "active"
-                elif today > record.end_date:
-                    record.status = "finished"
-            elif record.start_date and not record.end_date:
-                if today < record.start_date:
-                    record.status = "new"
-                else:
-                    record.status = "active"
+            record.status = record._get_status_from_progress()
 
     def action_cancel_practice(self):
         for record in self:
-            if record.status == "cancelled":
+            if record.is_cancelled:
                 continue
-            record.status = "cancelled"
+            record.is_cancelled = True
 
     def action_restore_practice(self):
         for record in self:
-            if record.status != "cancelled":
+            if not record.is_cancelled:
                 continue
-            record._set_status_from_dates()
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        records = super().create(vals_list)
-        records._set_status_from_dates()
-        return records
-
-    def write(self, vals):
-        res = super().write(vals)
-        if "start_date" in vals or "end_date" in vals:
-            self._set_status_from_dates()
-        return res
+            record.is_cancelled = False
 
     def unlink(self):
         applications = self.env["psi.intern.application"].sudo().search(

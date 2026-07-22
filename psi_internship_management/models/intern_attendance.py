@@ -125,3 +125,6 @@ class InternAttendance(models.Model):
         if "start_datetime" in vals or "end_datetime" in vals:
             self._set_status_from_datetimes()
         return res
+
+    def unlink(self):
+        return super().unlink()
