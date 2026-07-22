@@ -10,8 +10,8 @@ class InternshipPortalController(http.Controller):
 
     @staticmethod
     def _is_valid_phone(phone):
-        cleaned_phone = (phone or "").replace(" ", "").replace("+", "")
-        return cleaned_phone.isdigit() and len(cleaned_phone) == 11
+        cleaned_phone = (phone or "").replace(" ", "")
+        return cleaned_phone.isdigit() and len(cleaned_phone) == 9
 
     @staticmethod
     def _format_hours_label(hours):
@@ -52,6 +52,8 @@ class InternshipPortalController(http.Controller):
         if not student:
             if application and application.status == "new":
                 return "pending", "Oczekuje na akceptacje"
+            if application and application.status == "approved":
+                return "approved", "Zaakceptowane"
             if application and application.status == "rejected":
                 return "rejected", "Odrzucone"
             return "new", "Nowy"
@@ -194,6 +196,13 @@ class InternshipPortalController(http.Controller):
             "form_values": form_values or {},
         }
 
+    def _get_public_create_account_values(self, application, message=None):
+        return {
+            "page_name": "internship_public_create_account",
+            "application": application,
+            "message": message,
+        }
+
     def _get_public_status_values(self, application, message=None):
         portal_status, portal_status_label = self._get_portal_status(
             request.env["psi.intern.student"],
@@ -243,8 +252,6 @@ class InternshipPortalController(http.Controller):
     def internship_public_register_submit(self, **post):
         name = (post.get("name") or "").strip()
         email = (post.get("email") or "").strip().lower()
-        password = (post.get("password") or "").strip()
-        password_confirm = (post.get("password_confirm") or "").strip()
         phone = (post.get("phone") or "").strip()
         school = (post.get("school") or "").strip()
         field_of_study = (post.get("field_of_study") or "").strip()
@@ -265,7 +272,7 @@ class InternshipPortalController(http.Controller):
             "notes": notes,
         }
 
-        if not name or not email or not password or not password_confirm or not school or not field_of_study or not required_hours_raw:
+        if not name or not email or not school or not field_of_study or not required_hours_raw:
             values = self._get_public_registration_values(
                 message="registration_missing_fields",
                 form_values=form_values,
@@ -298,31 +305,15 @@ class InternshipPortalController(http.Controller):
             )
             return request.render("psi_internship_portal.portal_internship_public_register", values)
 
-        if password != password_confirm:
-            values = self._get_public_registration_values(
-                message="registration_password_mismatch",
-                form_values=form_values,
-            )
-            return request.render("psi_internship_portal.portal_internship_public_register", values)
-
         existing_application = request.env["psi.intern.application"].sudo().search(
             [("email", "=", email)],
             limit=1,
             order="create_date desc",
         )
         if existing_application:
-            message = "application_exists"
-            if existing_application.status == "rejected":
-                message = "registration_email_blocked"
-            elif existing_application.status == "approved":
-                message = "registration_email_exists"
-            values = self._get_public_registration_values(
-                message=message,
-                form_values=form_values,
-            )
-            return request.render(
-                "psi_internship_portal.portal_internship_public_register",
-                values,
+            return request.redirect(
+                "/internship/status/%s?message=application_exists"
+                % existing_application.registration_token
             )
 
         supervisor = self._get_default_supervisor()
@@ -356,7 +347,6 @@ class InternshipPortalController(http.Controller):
             "required_hours": required_hours,
             "supervisor_id": supervisor.id,
             "notes": notes,
-            "password_plain": password,
             "registration_token": str(uuid.uuid4()),
             "status": "new",
         }
@@ -370,6 +360,91 @@ class InternshipPortalController(http.Controller):
             "/internship/status/%s?message=application_submitted"
             % application.registration_token
         )
+
+    @http.route("/internship/create-account/<string:token>", type="http", auth="public", website=True)
+    def internship_public_create_account(self, token, message=None, **kwargs):
+        application = self._get_application_by_token(token)
+        if not application or application.status != "approved":
+            return request.not_found()
+        if application.user_id:
+            return request.redirect("/web/login?login=%s" % application.email)
+        values = self._get_public_create_account_values(application, message=message)
+        return request.render("psi_internship_portal.portal_internship_public_create_account", values)
+
+    @http.route(
+        "/internship/create-account/<string:token>/submit",
+        type="http",
+        auth="public",
+        website=True,
+        methods=["POST"],
+    )
+    def internship_public_create_account_submit(self, token, **post):
+        application = self._get_application_by_token(token)
+        if not application or application.status != "approved":
+            return request.not_found()
+
+        if application.user_id:
+            return request.redirect("/web/login?login=%s" % application.email)
+
+        password = (post.get("password") or "").strip()
+        password_confirm = (post.get("password_confirm") or "").strip()
+
+        if not password or not password_confirm:
+            values = self._get_public_create_account_values(
+                application,
+                message="account_missing_password",
+            )
+            return request.render(
+                "psi_internship_portal.portal_internship_public_create_account",
+                values,
+            )
+
+        if password != password_confirm:
+            values = self._get_public_create_account_values(
+                application,
+                message="account_password_mismatch",
+            )
+            return request.render(
+                "psi_internship_portal.portal_internship_public_create_account",
+                values,
+            )
+
+        existing_user = request.env["res.users"].sudo().search(
+            [("login", "=", application.email)],
+            limit=1,
+        )
+        if existing_user:
+            if application.student_id:
+                application.student_id.sudo().write({"user_id": existing_user.id})
+            application.sudo().write({"user_id": existing_user.id})
+            return request.redirect("/web/login?login=%s" % application.email)
+
+        portal_group = request.env.ref("base.group_portal")
+        user = request.env["res.users"].sudo().create(
+            {
+                "name": application.name,
+                "login": application.email,
+                "email": application.email,
+                "phone": application.phone,
+                "password": password,
+                "groups_id": [(6, 0, [portal_group.id])],
+            }
+        )
+
+        if user.partner_id:
+            user.partner_id.sudo().write(
+                {
+                    "name": application.name,
+                    "email": application.email,
+                    "phone": application.phone,
+                }
+            )
+
+        if application.student_id:
+            application.student_id.sudo().write({"user_id": user.id})
+
+        application.sudo().write({"user_id": user.id})
+        return request.redirect("/web/login?login=%s" % application.email)
 
     @http.route("/my/internship", type="http", auth="user", website=True)
     def my_internship(self, message=None, **kwargs):

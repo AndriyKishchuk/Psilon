@@ -41,11 +41,8 @@
                                 <t t-if="message == 'registration_missing_fields'">
                                     <div class="alert alert-warning rounded-4 border-0 shadow-sm">Uzupełnij wszystkie wymagane pola formularza.</div>
                                 </t>
-                                <t t-if="message == 'registration_password_mismatch'">
-                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Hasło i potwierdzenie hasła muszą być identyczne.</div>
-                                </t>
                                 <t t-if="message == 'registration_invalid_phone'">
-                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Numer telefonu musi zawierać dokładnie 11 cyfr. Możesz użyć formatu, np. +48 511 372 802.</div>
+                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Numer telefonu musi zawierac dokladnie 9 cyfr, bez prefiksu +48.</div>
                                 </t>
                                 <t t-if="message == 'registration_invalid_dates'">
                                     <div class="alert alert-warning rounded-4 border-0 shadow-sm">Data zakończenia nie może być wcześniejsza niż data rozpoczęcia.</div>
@@ -77,16 +74,8 @@
                                                     <input type="email" name="email" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('email') or ''" required="required"/>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label fw-semibold">Hasło</label>
-                                                    <input type="password" name="password" class="form-control form-control-lg rounded-4" required="required"/>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label fw-semibold">Potwierdź hasło</label>
-                                                    <input type="password" name="password_confirm" class="form-control form-control-lg rounded-4" required="required"/>
-                                                </div>
-                                                <div class="col-md-6">
                                                     <label class="form-label fw-semibold">Telefon</label>
-                                                    <input type="text" name="phone" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('phone') or '+48'"/>
+                                                    <input type="text" name="phone" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('phone') or ''"/>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label fw-semibold">Szkoła / Uczelnia</label>
@@ -182,8 +171,13 @@
                                         <div class="card-body p-4 p-lg-5 text-center">
                                             <span class="badge rounded-pill text-bg-success px-3 py-2 mb-3">Zaakceptowano</span>
                                             <h2 class="fw-bold mb-3">Twoje zgłoszenie zostało zaakceptowane</h2>
-                                            <p class="text-muted mb-4">Opiekun zatwierdził Twoje zgłoszenie. Konto zostało przygotowane i możesz teraz zalogować się adresem e-mail podanym w formularzu oraz hasłem ustawionym podczas rejestracji.</p>
-                                            <a href="/web/login" class="btn btn-primary btn-lg rounded-pill px-5">Przejdź do logowania</a>
+                                            <p class="text-muted mb-4">Opiekun zatwierdzil Twoje zgloszenie. Teraz mozesz przejsc do ostatniego kroku i ustawic haslo do swojego konta portalowego.</p>
+                                            <t t-if="application.user_id">
+                                                <a href="/web/login" class="btn btn-primary btn-lg rounded-pill px-5">Przejdz do logowania</a>
+                                            </t>
+                                            <t t-else="">
+                                                <a t-att-href="'/internship/create-account/%s' % application.registration_token" class="btn btn-primary btn-lg rounded-pill px-5">Utworz konto</a>
+                                            </t>
                                         </div>
                                     </div>
                                 </t>
@@ -198,6 +192,58 @@
                                         </div>
                                     </div>
                                 </t>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_internship_public_create_account" name="Utworzenie konta praktykanta">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure">
+                <section class="py-5" style="background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 45%, #ffffff 100%); min-height: 80vh;">
+                    <div class="container py-4 py-lg-5">
+                        <div class="row justify-content-center">
+                            <div class="col-xl-7 col-lg-9">
+                                <div class="text-center mb-5">
+                                    <span class="badge rounded-pill text-bg-light px-3 py-2 mb-3">Aktywacja konta</span>
+                                    <h1 class="display-5 fw-bold mb-3">Utworz haslo do swojego konta</h1>
+                                    <p class="lead text-muted mb-0">Twoje zgloszenie zostalo zaakceptowane. Ustaw haslo i przejdz do panelu praktyk.</p>
+                                </div>
+
+                                <t t-if="message == 'account_missing_password'">
+                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Uzupelnij haslo i potwierdzenie hasla.</div>
+                                </t>
+                                <t t-if="message == 'account_password_mismatch'">
+                                    <div class="alert alert-warning rounded-4 border-0 shadow-sm">Haslo i potwierdzenie hasla musza byc identyczne.</div>
+                                </t>
+
+                                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                                    <div class="card-body p-4 p-lg-5">
+                                        <form t-att-action="'/internship/create-account/%s/submit' % application.registration_token" method="post">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <div class="row g-4">
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">Adres e-mail</label>
+                                                    <input type="email" class="form-control form-control-lg rounded-4" t-att-value="application.email" readonly="readonly"/>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">Haslo</label>
+                                                    <input type="password" name="password" class="form-control form-control-lg rounded-4" required="required"/>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">Potwierdz haslo</label>
+                                                    <input type="password" name="password_confirm" class="form-control form-control-lg rounded-4" required="required"/>
+                                                </div>
+                                                <div class="col-12 d-grid d-md-flex justify-content-md-end">
+                                                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5">Utworz konto</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -558,7 +604,7 @@
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label fw-semibold">Telefon</label>
-                                                <input type="text" name="phone" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('phone') or '+48'"/>
+                                                <input type="text" name="phone" class="form-control form-control-lg rounded-4" t-att-value="form_values.get('phone') or ''"/>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label fw-semibold">Szkoła / Uczelnia</label>

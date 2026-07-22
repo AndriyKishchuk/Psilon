@@ -2,6 +2,7 @@
     <menuitem
         id="psi_internship_management_menu_root"
         name="Praktyki"
+        action="psi_intern_student_action"
         sequence="10"
     />
 
@@ -14,19 +15,27 @@
     />
 
     <menuitem
-        id="psi_internship_management_menu_attendance"
-        name="Plan obecnosci"
-        parent="psi_internship_management_menu_root"
-        action="psi_intern_student_attendance_summary_action"
-        sequence="2"
-    />
-
-    <menuitem
         id="psi_internship_management_menu_calendar"
         name="Kalendarz"
         parent="psi_internship_management_menu_root"
         action="psi_intern_student_calendar_action"
+        sequence="2"
+    />
+
+    <menuitem
+        id="psi_intern_application_menu"
+        name="Zgloszenia"
+        parent="psi_internship_management_menu_root"
+        action="psi_intern_application_action"
         sequence="3"
+    />
+
+    <menuitem
+        id="psi_intern_application_rejected_menu"
+        name="Odrzucone"
+        parent="psi_internship_management_menu_root"
+        action="psi_intern_application_rejected_action"
+        sequence="4"
     />
 
     <menuitem
@@ -34,6 +43,6 @@
         name="Kalendarz obecnosci"
         parent="psi_internship_management_menu_root"
         action="psi_intern_attendance_calendar_action"
-        sequence="4"
+        sequence="5"
     />
 </odoo>

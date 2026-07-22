@@ -1,4 +1,5 @@
 import re
+
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -8,14 +9,12 @@ class InternStudent(models.Model):
     _description = "Intern Student"
     _order = "name"
 
-    # Main info
     name = fields.Char(string="Imie i nazwisko", required=True)
-    phone = fields.Char(string="Telefon", default="+48")
+    phone = fields.Char(string="Telefon")
     email = fields.Char(string="Email")
     image_1920 = fields.Image(string="Zdjecie")
     user_id = fields.Many2one("res.users", string="Uzytkownik systemu")
 
-    # Work
     start_date = fields.Date(string="Data rozpoczecia")
     end_date = fields.Date(string="Data zakonczenia")
     supervisor_id = fields.Many2one("res.users", string="Opiekun", required=True)
@@ -44,14 +43,12 @@ class InternStudent(models.Model):
         string="Plan obecnosci",
     )
 
-    # Personal
     birthdate = fields.Date(string="Data urodzenia")
     street = fields.Char(string="Ulica")
     city = fields.Char(string="Miasto")
     zip_code = fields.Char(string="Kod pocztowy")
     country = fields.Char(string="Kraj")
 
-    # Resume
     education_notes = fields.Text(string="Wyksztalcenie")
     experience_notes = fields.Text(string="Doswiadczenie")
     skills_notes = fields.Text(string="Umiejetnosci")
@@ -63,7 +60,6 @@ class InternStudent(models.Model):
     resume_file = fields.Binary(string="Plik CV")
     resume_filename = fields.Char(string="Nazwa pliku CV")
 
-    # Documents
     document_ids = fields.Many2many(
         "ir.attachment",
         "psi_intern_student_ir_attachments_rel",
@@ -72,7 +68,6 @@ class InternStudent(models.Model):
         string="Dokumenty",
     )
 
-    # Settings
     active = fields.Boolean(string="Aktywny", default=True)
     notes = fields.Text(string="Notatki")
 
@@ -81,7 +76,7 @@ class InternStudent(models.Model):
         for record in self:
             if record.start_date and record.end_date and record.end_date < record.start_date:
                 raise ValidationError(
-                    "Data zakonczenia nie moze byc wczesniejsza ni? data rozpoczecia."
+                    "Data zakonczenia nie moze byc wczesniejsza niz data rozpoczecia."
                 )
 
     @api.constrains("email")
@@ -94,11 +89,11 @@ class InternStudent(models.Model):
     def _check_phone(self):
         for record in self:
             if record.phone:
-                cleaned_phone = record.phone.replace(" ", "").replace("+", "")
+                cleaned_phone = record.phone.replace(" ", "")
                 if not cleaned_phone.isdigit():
                     raise ValidationError("Numer telefonu moze zawierac tylko cyfry.")
-                if len(cleaned_phone) != 11:
-                    raise ValidationError("Numer telefonu musi miec dok?adnie 11 cyfr.")
+                if len(cleaned_phone) != 9:
+                    raise ValidationError("Numer telefonu musi miec dokladnie 9 cyfr.")
 
     @api.constrains("status", "end_date")
     def _check_finished_requires_end_date(self):
@@ -198,3 +193,22 @@ class InternStudent(models.Model):
         if "start_date" in vals or "end_date" in vals:
             self._set_status_from_dates()
         return res
+
+    def unlink(self):
+        applications = self.env["psi.intern.application"].sudo().search(
+            [("student_id", "in", self.ids)]
+        )
+        if applications:
+            applications.unlink()
+
+        for record in self:
+            if record.document_ids:
+                record.document_ids = [(5, 0, 0)]
+            if record.user_id:
+                other_students = self.env["psi.intern.student"].sudo().search_count(
+                    [("user_id", "=", record.user_id.id), ("id", "!=", record.id)]
+                )
+                if not other_students:
+                    record.user_id.sudo().write({"active": False})
+
+        return super().unlink()
