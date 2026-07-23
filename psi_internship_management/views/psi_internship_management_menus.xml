@@ -45,4 +45,12 @@
         action="psi_intern_attendance_calendar_action"
         sequence="5"
     />
+
+    <menuitem
+        id="psi_internship_management_menu_supervisors"
+        name="Opiekunowie"
+        parent="psi_internship_management_menu_root"
+        action="psi_internship_supervisor_action"
+        sequence="6"
+    />
 </odoo>

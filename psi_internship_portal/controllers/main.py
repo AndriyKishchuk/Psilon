@@ -31,7 +31,15 @@ class InternshipPortalController(http.Controller):
         )
 
     def _get_application_for_current_user(self):
-        return request.env["psi.intern.application"].sudo().search(
+        Application = request.env["psi.intern.application"].sudo()
+        application = Application.search(
+            [("user_id", "=", request.env.user.id), ("status", "=", "new")],
+            limit=1,
+            order="create_date desc",
+        )
+        if application:
+            return application
+        return Application.search(
             [("user_id", "=", request.env.user.id)],
             limit=1,
             order="create_date desc",
@@ -44,9 +52,8 @@ class InternshipPortalController(http.Controller):
         )
 
     def _is_pending_application_user(self, student=None, application=None):
-        student = student or self._get_student_for_current_user()
         application = application or self._get_application_for_current_user()
-        return bool(application and application.status == "new" and not student)
+        return bool(application and application.status == "new")
 
     def _get_portal_status(self, student, application=None):
         if not student:
@@ -309,12 +316,20 @@ class InternshipPortalController(http.Controller):
             )
             return request.render("psi_internship_portal.portal_internship_public_register", values)
 
-        existing_application = request.env["psi.intern.application"].sudo().search(
+        Application = request.env["psi.intern.application"].sudo()
+        existing_application = Application.search(
             [("email", "=", email)],
             limit=1,
             order="create_date desc",
         )
-        if existing_application:
+        if existing_application and existing_application.status == "new":
+            return request.redirect(
+                "/internship/status/%s?message=application_exists"
+                % existing_application.registration_token
+            )
+        if existing_application and existing_application.status == "approved":
+            if existing_application.user_id:
+                return request.redirect("/web/login?login=%s" % existing_application.email)
             return request.redirect(
                 "/internship/status/%s?message=application_exists"
                 % existing_application.registration_token
@@ -456,6 +471,8 @@ class InternshipPortalController(http.Controller):
     def my_internship(self, message=None, **kwargs):
         student = self._get_student_for_current_user()
         application = self._get_application_for_current_user()
+        if application and application.status == "new":
+            student = request.env["psi.intern.student"]
         values = self._get_dashboard_values(student, application=application, message=message)
         return request.render("psi_internship_portal.portal_my_internship", values)
 
@@ -499,7 +516,7 @@ class InternshipPortalController(http.Controller):
         if student:
             return request.redirect("/my/internship")
         application = self._get_application_for_current_user()
-        if application:
+        if application and application.status == "new":
             return request.redirect("/my/internship")
 
         name = (post.get("name") or request.env.user.name or "").strip()
