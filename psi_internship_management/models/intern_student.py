@@ -180,6 +180,16 @@ class InternStudent(models.Model):
         for record in self:
             if record.is_cancelled:
                 continue
+
+            if record.user_id and record.user_id.share:
+                portal_user = record.user_id.sudo()
+                other_students = self.env["psi.intern.student"].sudo().search_count(
+                    [("user_id", "=", portal_user.id), ("id", "!=", record.id)]
+                )
+                record.user_id = False
+                if not other_students:
+                    portal_user.unlink()
+
             record.is_cancelled = True
 
     def action_restore_practice(self):
@@ -198,11 +208,13 @@ class InternStudent(models.Model):
         for record in self:
             if record.document_ids:
                 record.document_ids = [(5, 0, 0)]
-            if record.user_id:
+            if record.user_id and record.user_id.share:
+                portal_user = record.user_id.sudo()
                 other_students = self.env["psi.intern.student"].sudo().search_count(
-                    [("user_id", "=", record.user_id.id), ("id", "!=", record.id)]
+                    [("user_id", "=", portal_user.id), ("id", "!=", record.id)]
                 )
+                record.user_id = False
                 if not other_students:
-                    record.user_id.sudo().write({"active": False})
+                    portal_user.unlink()
 
         return super().unlink()

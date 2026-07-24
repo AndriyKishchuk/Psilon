@@ -499,7 +499,7 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="rounded-4 p-4 h-100" style="background: #f8fafc; border: 1px solid #e2e8f0;">
-                                            <div class="text-muted small text-uppercase fw-semibold mb-2">Aktualny status obecności</div>
+                                        <div class="text-muted small text-uppercase fw-semibold mb-2">Aktualny status obecności</div>
                                         <t t-if="current_attendance">
                                             <div class="fw-semibold mb-1">Jesteś aktualnie na praktykach</div>
                                             <div class="text-muted small">Start: <span t-field="current_attendance.start_datetime"/></div>
@@ -660,28 +660,28 @@
                         <t t-if="student">
                             <div class="text-muted">Praktykant: <span class="fw-semibold text-dark"><t t-esc="student.name"/></span></div>
                         </t>
-                        </div>
-                        <a href="/my/internship" class="btn btn-outline-secondary rounded-pill px-4">Wróć do panelu</a>
                     </div>
+                    <a href="/my/internship" class="btn btn-outline-secondary rounded-pill px-4">Wróć do panelu</a>
+                </div>
 
-                    <div class="card border-0 shadow-sm rounded-4 mb-4">
-                        <div class="card-body p-3">
-                            <div class="d-flex flex-wrap gap-2">
-                                <a href="/my/internship" class="btn btn-outline-secondary rounded-pill px-4 py-2">
-                                    Panel
-                                </a>
-                                <a href="/my/internship/profile" class="btn btn-outline-secondary rounded-pill px-4 py-2">
-                                    Mój profil
-                                </a>
-                                <a href="/my/internship/attendance" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
-                                    Plan obecności
-                                </a>
-                                <a href="/my/internship/documents" class="btn btn-outline-secondary rounded-pill px-4 py-2">
-                                    Dokumenty
-                                </a>
-                            </div>
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-3">
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="/my/internship" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                                Panel
+                            </a>
+                            <a href="/my/internship/profile" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                                Mój profil
+                            </a>
+                            <a href="/my/internship/attendance" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
+                                Plan obecności
+                            </a>
+                            <a href="/my/internship/documents" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                                Dokumenty
+                            </a>
                         </div>
                     </div>
+                </div>
 
                 <t t-if="student and attendances">
                     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
@@ -715,7 +715,6 @@
                     <div class="rounded-4 p-4 text-center text-muted shadow-sm" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
                         Nie masz jeszcze żadnych wpisów obecności.
                     </div>
-
                 </t>
                 <t t-else="">
                     <div class="alert alert-warning rounded-4 shadow-sm border-0 p-4">
@@ -832,7 +831,7 @@
                                             <div class="row g-3">
                                                 <div class="col-md-6">
                                                     <div class="rounded-4 bg-light p-3 h-100">
-                                                <div class="text-muted small">Szkoła / Uczelnia</div>
+                                                        <div class="text-muted small">Szkoła / Uczelnia</div>
                                                         <div class="fw-semibold"><t t-esc="student.school or '-'"/></div>
                                                     </div>
                                                 </div>
@@ -844,13 +843,13 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="rounded-4 bg-light p-3 h-100">
-                                                <div class="text-muted small">Data rozpoczęcia</div>
+                                                        <div class="text-muted small">Data rozpoczęcia</div>
                                                         <div class="fw-semibold"><t t-esc="student.start_date or '-'"/></div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="rounded-4 bg-light p-3 h-100">
-                                                <div class="text-muted small">Data zakończenia</div>
+                                                        <div class="text-muted small">Data zakończenia</div>
                                                         <div class="fw-semibold"><t t-esc="student.end_date or '-'"/></div>
                                                     </div>
                                                 </div>

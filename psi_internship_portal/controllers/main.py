@@ -89,6 +89,15 @@ class InternshipPortalController(http.Controller):
             order="id asc",
         )
 
+    def _release_inactive_portal_user(self, email):
+        stale_user = request.env["res.users"].sudo().with_context(active_test=False).search(
+            [("login", "=", email), ("share", "=", True), ("active", "=", False)],
+            limit=1,
+        )
+        if stale_user:
+            stale_user.write({"login": f"archived_{stale_user.id}_{email}"})
+        return stale_user
+
     @staticmethod
     def _is_cancelled_student(student):
         return bool(student and student.status == "cancelled")
@@ -343,7 +352,8 @@ class InternshipPortalController(http.Controller):
             )
             return request.render("psi_internship_portal.portal_internship_public_register", values)
 
-        existing_user = request.env["res.users"].sudo().search(
+        self._release_inactive_portal_user(email)
+        existing_user = request.env["res.users"].sudo().with_context(active_test=False).search(
             [("login", "=", email)],
             limit=1,
         )
@@ -428,7 +438,8 @@ class InternshipPortalController(http.Controller):
                 values,
             )
 
-        existing_user = request.env["res.users"].sudo().search(
+        self._release_inactive_portal_user(application.email)
+        existing_user = request.env["res.users"].sudo().with_context(active_test=False).search(
             [("login", "=", application.email)],
             limit=1,
         )

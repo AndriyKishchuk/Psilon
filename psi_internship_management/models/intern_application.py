@@ -82,6 +82,31 @@ class InternApplication(models.Model):
                 subtype_xmlid="mail.mt_comment",
             )
 
+    def get_signup_url(self):
+        self.ensure_one()
+        return "/internship/create-account/%s" % self.registration_token
+
+    def _send_approval_email(self):
+        template = self.env.ref(
+            "psi_internship_management.mail_template_intern_application_approved",
+            raise_if_not_found=False,
+        )
+        if not template:
+            return
+        for record in self:
+            template.send_mail(record.id, force_send=True)
+
+    def _send_rejection_email(self):
+        template = self.env.ref(
+            "psi_internship_management.mail_template_intern_application_rejected",
+            raise_if_not_found=False,
+        )
+        if not template:
+            return
+        for record in self:
+            if record.email:
+                template.send_mail(record.id, force_send=True)
+
     @api.constrains("email")
     def _check_email(self):
         for record in self:
@@ -168,6 +193,7 @@ class InternApplication(models.Model):
 
             record.student_id = student.id
             record.status = "approved"
+            record._send_approval_email()
 
     def action_reject(self):
         for record in self:
@@ -177,6 +203,7 @@ class InternApplication(models.Model):
                     "user_id": False,
                 }
             )
+            record._send_rejection_email()
 
     def action_notify_account_created(self):
         for record in self:
